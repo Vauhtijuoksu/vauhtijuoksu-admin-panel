@@ -2,18 +2,10 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-const url = 'https://api.dev.vauhtijuoksu.fi/donations';
-const donations = ref([]);
-
-const getDonations = () => {
-  axios.get(url)
-    .then((response) => {
-      donations.value = response.data;
-    }).catch((err) => {
-      console.log(err);
-    });
-    setTimeout(getDonations, 3000);
-}
+const props = defineProps({
+  url: String,
+  donations: Object
+})
 
 const markDonationRead = (id) => {
   axios.patch(`${url}/01a141a8-263a-4ff7-80e8-faaec4d385f5`, {read: true}, {
@@ -28,8 +20,6 @@ const markDonationRead = (id) => {
       console.log(err);
     });
 }
-
-getDonations();
 </script>
 
 <template>

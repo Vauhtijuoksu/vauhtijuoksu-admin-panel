@@ -1,32 +1,25 @@
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref, toRefs, watch } from 'vue'
 
-const url = 'https://api.dev.vauhtijuoksu.fi/donations';
-const sum_txt = ref("");
+const props = defineProps({
+  donations: Object
+})
 
-const getDonations = () => {
-  axios.get(url)
-    .then((response) => {
-      let donations = response.data;
-      let sum = 0
-      for (let donation of donations){
-        sum += donation.amount
-      }
-      sum_txt.value = sum.toString()
-    }).catch((err) => {
-      console.log(err);
-    });
-    setTimeout(getDonations, 3000);
-}
+const { donations } = toRefs(props);
 
+let sum = ref(0);
 
-getDonations();
+watch(donations, () => {
+  sum.value = 0;
+  for (let donation of donations.value){
+    sum.value += donation.amount
+  }
+})
 </script>
 
 <template>
   <div>
-  Kerätty: {{ sum_txt }} €
+  Kerätty: {{ sum }} €
   </div>
 </template>
 
