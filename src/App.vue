@@ -12,16 +12,16 @@ const url = 'https://api.dev.vauhtijuoksu.fi';
 const urlLegacy = 'https://legacy.vauhtijuoksu.fi';
 
 const donations = ref([]);
-const streamMetadata = ref({});
+const streamMetaData = ref({});
 
-const getStreamMetadata = () => {
+const getStreamMetaData = () => {
   axios.get(`${urlLegacy}/api/stream_metadata`)
     .then((response) => {
-      streamMetadata.value = response.data;
+      streamMetaData.value = response.data;
     }).catch((err) => {
       console.log(err);
     });
-    setTimeout(getStreamMetadata, 3000);
+    setTimeout(getStreamMetaData, 3000);
 }
 
 const getDonations = () => {
@@ -34,7 +34,7 @@ const getDonations = () => {
     setTimeout(getDonations, 3000);
 }
 
-getStreamMetadata();
+getStreamMetaData();
 getDonations();
 </script>
 
@@ -43,7 +43,7 @@ getDonations();
     <Sum :donations="donations" />
   </div>
   <Authentication />
-  <StreamData />
+  <StreamData :url="urlLegacy" :streamMetaData="streamMetaData" />
   <Donations :url="url" :donations="donations" />
 </template>
 

@@ -5,15 +5,6 @@ import axios from 'axios'
 const username = ref(localStorage.getItem('username'));
 const password = ref(localStorage.getItem('password'));
 
-const getStreamMetadata = () => {
-  axios.get(url)
-    .then((response) => {
-      streamMetadata.value = response.data;
-    }).catch((err) => {
-      console.log(err);
-    });
-}
-
 const onSubmit = () => {
   localStorage.setItem('username', username.value);
   localStorage.setItem('password', password.value);

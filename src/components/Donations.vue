@@ -1,11 +1,13 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, toRefs } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
   url: String,
   donations: Object
 })
+
+const { url } = toRefs(props);
 
 const markDonationRead = (id) => {
   axios.patch(`${url}/01a141a8-263a-4ff7-80e8-faaec4d385f5`, {read: true}, {
