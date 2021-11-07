@@ -1,29 +1,60 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 
 const username = ref(localStorage.getItem('username'));
 const password = ref(localStorage.getItem('password'));
 
+
 const onSubmit = () => {
-  localStorage.setItem('username', username.value);
-  localStorage.setItem('password', password.value);
-}
+  if (username.value && password.value) {
+    localStorage.setItem('username', username.value);
+    localStorage.setItem('password', password.value);
+    document.getElementById("login").classList.remove("no-login")
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("login").style.display = "block";
+  }
+
+};
+const onLoginClick = () => {
+  document.getElementById("auth").style.display = "block";
+  document.getElementById("login").style.display = "none";
+
+};
+
+onMounted(()=> {
+  document.getElementById("auth").style.display = "none";
+  console.log(username.value)
+  if (username.value) {
+    document.getElementById("login").classList.remove("no-login")
+  }
+})
 </script>
 
 <template>
-<form @submit.prevent="onSubmit">
-  <div class="mb-3">
-    <label class="form-label">Username</label>
-    <input v-model="username" type="text" class="form-control">
+  <div id="login" class="no-login">
+    <form @submit.prevent="onLoginClick">
+      <div class="flex-row">
+
+        <div class="user">Käyttäjä: {{ username }}</div>
+      <button type="submit" class="btn btn-primary">Kirjaudu sisään</button>
+      </div>
+    </form>
   </div>
-  <div class="mb-3">
-    <label class="form-label">Password</label>
-    <input v-model="password" type="password" class="form-control">
+  <div id="auth" class="auth">
+    <form @submit.prevent="onSubmit">
+      <div class="flex-row">
+        <label class="form-label">Username</label>
+        <input v-model="username" type="text" class="form-control">
+        <label class="form-label">Password</label>
+        <input v-model="password" type="password" class="form-control">
+
+        <button type="submit" class="btn btn-primary">Kirjaudu</button>
+      </div>
+    </form>
   </div>
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
 </template>
+
 
 <style scoped>
 </style>

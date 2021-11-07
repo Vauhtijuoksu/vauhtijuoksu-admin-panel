@@ -2,3 +2,22 @@ body {
     background-color: #030817;
     color: #e0e0e0;
 }
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.no-login button{
+    background-color: #9e2c2c;
+    border-color: #580505;
+}
+
+.no-login .user{
+    display: none;
+}
+
+.death-off .minus{
+    display: none;
+}
