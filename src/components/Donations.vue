@@ -22,17 +22,23 @@ const markDonationRead = (id) => {
       console.log(err);
     });
 }
+
+const censorName = (id, name) => {
+  let conf = confirm('Haluatko sensuroida käyttäjänimen ' + name + '?');
+  if (conf){
+    console.log("LAITA TÄHÄ :D::D:DD:D:D")
+  }
+}
 </script>
 
 <template>
-<button @click="markDonationRead" type="submit" class="btn btn-primary">Mark donation read</button>
-
   <table class="table">
     <thead>
       <tr>
         <th scope="col">ID</th>
         <th scope="col">read</th>
         <th scope="col">timestamp</th>
+        <th scope="col"></th>
         <th scope="col">name</th>
         <th scope="col">message</th>
         <th scope="col">amount</th>
@@ -41,8 +47,10 @@ const markDonationRead = (id) => {
     <tbody>
       <tr v-for="donation in donations" :key="donation.id">
         <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
-        <td><button @click="markDonationRead" type="submit" class="btn btn-primary">Mark</button></td>
-        <td>{{ donation.timestamp }}</td>
+        <td><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary">Mark</button></td>
+        <td>{{ donation.timestamp }}<br>
+        glukoosi ^ -> d.m hh:mm</td>
+        <td><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>
         <td>{{ donation.amount }}</td>
