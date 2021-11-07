@@ -64,7 +64,7 @@ const setCurrentDeaths = (direction) => {
   </div>
   <div>
   <button @click="setCurrentDeaths(-1)" type="submit" class="btn btn-primary minus">-</button>
-  {{ death }}
+  <div class="deathcount">{{ death }}</div>
   <button @click="setCurrentDeaths(1)" type="submit" class="btn btn-primary">+</button>
   </div>
   </div>

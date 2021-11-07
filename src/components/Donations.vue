@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRefs } from 'vue'
+import {ref, toRefs, watch} from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -7,7 +7,7 @@ const props = defineProps({
   donations: Object
 })
 
-const { url } = toRefs(props);
+const { url, donations } = toRefs(props);
 
 const markDonationRead = (id) => {
   axios.patch(`${url}/01a141a8-263a-4ff7-80e8-faaec4d385f5`, {read: true}, {
@@ -27,32 +27,28 @@ const markDonationRead = (id) => {
 <template>
 <button @click="markDonationRead" type="submit" class="btn btn-primary">Mark donation read</button>
 
-<ul id="array-rendering">
   <table class="table">
     <thead>
       <tr>
-        <th scope="col">id</th>
+        <th scope="col">ID</th>
+        <th scope="col">read</th>
         <th scope="col">timestamp</th>
         <th scope="col">name</th>
         <th scope="col">message</th>
         <th scope="col">amount</th>
-        <th scope="col">read</th>
-        <th scope="col">external_id</th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="donation in donations" :key="donation.id">
-        <td>{{ donation.id }}</td>
+        <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
+        <td><button @click="markDonationRead" type="submit" class="btn btn-primary">Mark</button></td>
         <td>{{ donation.timestamp }}</td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>
         <td>{{ donation.amount }}</td>
-        <td>{{ donation.read }}</td>
-        <td>{{ donation.external_id }}</td>
       </tr>
     </tbody>
   </table>
-</ul>
 </template>
 
 <style scoped>

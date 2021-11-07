@@ -13,6 +13,7 @@ const onSubmit = () => {
     document.getElementById("login").classList.remove("no-login")
     document.getElementById("auth").style.display = "none";
     document.getElementById("login").style.display = "block";
+    location.reload();
   }
 
 };
