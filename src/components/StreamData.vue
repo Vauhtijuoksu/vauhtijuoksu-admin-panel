@@ -35,7 +35,7 @@ getStreamMetadata();
 
 <template>
 {{ streamMetadata }}
-<form @submit.prevent="postStreamInfo">
+<form @submit.prevent="postStreamInfo">StreamData.vue
   <div class="mb-3">
     <label class="form-label">Stream Info</label>
     <textarea v-model="info"  class="form-control"  rows="3"></textarea>
