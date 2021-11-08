@@ -50,7 +50,12 @@ const setCurrentDeaths = (direction) => {
               }
             })
     .then((response) => {
-      console.log(response);
+      if (death.value === "OFF"){
+        death.value = 0;
+        document.getElementById(player.value - 1).classList.remove("death-off");
+      } else {
+        death.value = death.value + response.data.death_add;
+      }
     }).catch((err) => {
       console.log(err);
     })
