@@ -10,7 +10,7 @@ const props = defineProps({
 const { url, donations } = toRefs(props);
 
 const markDonationRead = (id) => {
-  axios.patch(`${url}/01a141a8-263a-4ff7-80e8-faaec4d385f5`, {read: true}, {
+  axios.patch(`${url.value}/${id}`, {read: true}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')
@@ -26,9 +26,20 @@ const markDonationRead = (id) => {
 const censorName = (id, name) => {
   let conf = confirm('Haluatko sensuroida käyttäjänimen ' + name + '?');
   if (conf){
-    console.log("LAITA TÄHÄ :D::D:DD:D:D")
+    axios.patch(`${url.value}/${id}`, {name: 'höpö'}, {
+                auth: {
+                  username: localStorage.getItem('username'),
+                  password: localStorage.getItem('password')
+                }
+              })
+      .then((response) => {
+        console.log(response)
+      }).catch((err) => {
+        console.log(err);
+      });
   }
 }
+
 </script>
 
 <template>
