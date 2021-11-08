@@ -15,6 +15,7 @@ import updateGoal from "./components/updateGoal.vue";
 import ResetDeath from "./components/ResetDeath.vue"
 import Heartrate from "./components/Heartrate.vue";
 import Incentives from "./components/Incentives.vue";
+import DonationsFlag from "./components/DonationsFlag.vue";
 
 const url = 'https://api.dev.vauhtijuoksu.fi';
 const urlLegacy = 'https://legacy.vauhtijuoksu.fi';
@@ -94,6 +95,9 @@ getGames();
       </div>
       <div class="stream-info">
         <StreamInfo :url="urlLegacy" :streamMetaData="streamMetaData"/>
+      </div>
+      <div class="donflag">
+        <DonationsFlag :url="urlLegacy"/>
       </div>
       <div>
         <updateGoal :url="urlLegacy" :streamMetaData="streamMetaData"/>
