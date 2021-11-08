@@ -4,10 +4,25 @@ import axios from 'axios'
 
 const props = defineProps({
   url: String,
+  legacyurl: String,
   donations: Object
 })
 
-const { url, donations } = toRefs(props);
+const { url, legacyurl, donations } = toRefs(props);
+
+const incentiveinfo = ref({});
+
+const getIncentiveInfo = () => {
+  axios.get(`${legacyurl.value}/api/incentive_code_info`)
+      .then((response) => {
+        incentiveinfo.value = response.data;
+      }).catch((err) => {
+    console.log(err);
+  });
+  setTimeout(getIncentiveInfo, 3000);
+}
+getIncentiveInfo()
+
 
 const markDonationRead = (id) => {
   axios.patch(`${url.value}/donations/${id}`, {read: true}, {
@@ -52,6 +67,7 @@ const censorName = (id, name) => {
         <th scope="col"></th>
         <th scope="col">name</th>
         <th scope="col">message</th>
+        <th scope="col">codeinfo</th>
         <th scope="col">amount</th>
       </tr>
     </thead>
@@ -64,6 +80,20 @@ const censorName = (id, name) => {
         <td><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>
+        <td>
+          <div class="incentive_info">
+            📄
+            <div v-if="donation.message">
+              <div v-for="code in Object.keys(incentiveinfo)">
+                <div v-if="donation.message.includes(code)">
+                  <div v-for="info in incentiveinfo[code]">
+                    {{ info }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
         <td>{{ donation.amount }}</td>
       </tr>
     </tbody>

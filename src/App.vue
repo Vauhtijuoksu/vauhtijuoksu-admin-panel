@@ -105,7 +105,7 @@ getGames();
     </div>
     <div class="info flex-row item">
       <div class="scrollable donations">
-        <Donations :url="url" :donations="donations"/>
+        <Donations :url="url" :legacyurl="urlLegacy" :donations="donations"/>
       </div>
       <div class="scrollable incentives">
         <Incentives/>

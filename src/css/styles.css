@@ -46,6 +46,7 @@ html, body, #app{
 
 .scrollable{
   overflow-y: auto;
+    overflow-x: visible;
 }
 
 .table {
@@ -94,7 +95,26 @@ button{
 .donflag{
     width: 200px;
 }
+.incentive_info{
+    position: relative;
 
+}
+.incentive_info > div{
+    display: none;
+    position: absolute;
+    background-color: #030817;
+    font-size: 18px;
+    padding: 10px;
+    margin-top: -5px;
+    white-space: nowrap;
+    z-index: 1000;
+    right: 90px;
+}
+
+
+.incentive_info:hover > div{
+    display: inline-block;
+}
 
 /* KAIKKI TÄN JÄLKEEN ON LEGACYPASKAA */
 .amount{
