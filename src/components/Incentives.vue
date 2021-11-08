@@ -14,6 +14,7 @@ function getIncentives() {
         if (xhr.readyState == 4) {
             incentives = JSON.parse(xhr.responseText);
             updateIncentives()
+            setTimeout(getIncentives, 3000);
         }
     }
     xhr.send();
