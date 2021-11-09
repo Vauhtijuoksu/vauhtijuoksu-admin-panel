@@ -25,7 +25,6 @@ const onLoginClick = () => {
 
 onMounted(()=> {
   document.getElementById("auth").style.display = "none";
-  console.log(username.value)
   if (username.value) {
     document.getElementById("login").classList.remove("no-login")
   }

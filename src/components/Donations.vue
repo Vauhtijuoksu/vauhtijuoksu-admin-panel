@@ -75,8 +75,7 @@ const censorName = (id, name) => {
       <tr v-for="donation in donations.slice().reverse()" :key="donation.id">
         <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
         <td><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary">Mark</button></td>
-        <td>{{ donation.timestamp }}<br>
-        glukoosi ^ -> d.m hh:mm</td>
+        <td>{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
         <td><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>

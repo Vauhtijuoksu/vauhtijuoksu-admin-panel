@@ -11,7 +11,6 @@ const { url, streamMetaData } = toRefs(props);
 
 
 const setCurrentGame = (direction) => {
-  console.log({game: streamMetaData.value.game + direction})
   axios.post(`${url.value}/api/game`, {game: streamMetaData.value.game + direction}, {
               auth: {
                 username: localStorage.getItem('username'),
