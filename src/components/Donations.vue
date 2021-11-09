@@ -42,8 +42,10 @@ const markDonation = (id, readValue) => {
                 password: localStorage.getItem('password')
               }
             })
-    .then((response) => {
-      donations.value.key.read = readValue;
+    .then(() => {
+      let obj = donations.value.find(x => x.id === id);
+      let index = donations.value.indexOf(obj);
+      donations.value.fill(obj.read=readValue, index, index++);
     }).catch((err) => {
       console.log(err);
     });
