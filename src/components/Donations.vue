@@ -35,15 +35,15 @@ const getIncentiveInfo = () => {
 getIncentiveInfo()
 
 
-const markDonationRead = (id) => {
-  axios.patch(`${url.value}/donations/${id}`, {read: true}, {
+const markDonation = (id, readValue) => {
+  axios.patch(`${url.value}/donations/${id}`, {read: readValue}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')
               }
             })
     .then((response) => {
-      console.log(response)
+      donations.value.key.read = readValue;
     }).catch((err) => {
       console.log(err);
     });
@@ -85,7 +85,7 @@ const censorName = (id, name) => {
     <tbody>
       <tr v-for="donation in donations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
         <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
-        <td v-if="islogged"><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
+        <td v-if="islogged"><button @click="markDonation(donation.id, !donation.read)" type="submit" class="btn btn-primary"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
         <td>{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
         <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>

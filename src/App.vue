@@ -81,8 +81,7 @@ getGames();
     </div>
     <div id="admin" class="admin flex-row hidden">
       <div class="games">
-        <Game :games="games" :streamMetaData="streamMetaData"/>
-        <GameChanger :url="urlLegacy" :streamMetaData="streamMetaData"/>
+        <GameChanger :games="games" :url="urlLegacy" :streamMetaData="streamMetaData"/>
       </div>
       <div>
         <div class="flex-row">

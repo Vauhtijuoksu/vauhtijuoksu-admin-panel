@@ -1,14 +1,21 @@
 <script setup>
-import { ref, toRefs } from 'vue'
+import { watch, ref, toRefs } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
+  games: Object,
   url: String,
   streamMetaData: Object
 })
 
-const { url, streamMetaData } = toRefs(props);
+const { games, url, streamMetaData } = toRefs(props);
 
+let game = ref("Loading...");
+watch(streamMetaData, () => {
+  if (games.value.length){
+    game.value = games.value[streamMetaData.value.game].game
+  }
+})
 
 const setCurrentGame = (direction) => {
   axios.post(`${url.value}/api/game`, {game: streamMetaData.value.game + direction}, {
@@ -17,8 +24,10 @@ const setCurrentGame = (direction) => {
                 password: localStorage.getItem('password')
               }
             })
-    .then((response) => {
-      console.log(response);
+    .then(() => {
+      if (games.value.length){
+        game.value = games.value[streamMetaData.value.game + direction].game;
+      }
     }).catch((err) => {
       console.log(err);
     })
@@ -26,6 +35,9 @@ const setCurrentGame = (direction) => {
 </script>
 
 <template>
+<div>
+  {{ game }}
+</div>
 <button @click="setCurrentGame(-1)" type="submit" class="btn btn-primary">Edellinen</button>
 <button @click="setCurrentGame(1)" type="submit" class="btn btn-primary">Seuraava</button>
 </template>

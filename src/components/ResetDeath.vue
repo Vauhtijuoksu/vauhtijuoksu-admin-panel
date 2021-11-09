@@ -6,7 +6,7 @@ const props = defineProps({
   url: String
 })
 
-const { url } = toRefs(props);
+const { url, streamMetaData } = toRefs(props);
 
 
 
