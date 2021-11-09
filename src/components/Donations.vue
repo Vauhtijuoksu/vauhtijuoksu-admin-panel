@@ -72,7 +72,7 @@ const censorName = (id, name) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="donation in donations" :key="donation.id">
+      <tr v-for="donation in donations.slice().reverse()" :key="donation.id">
         <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
         <td><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary">Mark</button></td>
         <td>{{ donation.timestamp }}<br>
