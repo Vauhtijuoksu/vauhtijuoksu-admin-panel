@@ -1,5 +1,5 @@
 <script setup>
-import {ref, toRefs, watch} from 'vue'
+import {onMounted, ref, toRefs, watch} from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
@@ -11,6 +11,17 @@ const props = defineProps({
 const { url, legacyurl, donations } = toRefs(props);
 
 const incentiveinfo = ref({});
+
+const username = ref(localStorage.getItem('username'));
+
+
+
+let islogged = ref(false);
+onMounted(()=> {
+  if (username.value) {
+    islogged.value = true
+  }
+})
 
 const getIncentiveInfo = () => {
   axios.get(`${legacyurl.value}/api/incentive_code_info`)
@@ -62,9 +73,9 @@ const censorName = (id, name) => {
     <thead>
       <tr>
         <th scope="col">ID</th>
-        <th scope="col">read</th>
+        <th v-if="islogged" scope="col">read</th>
         <th scope="col">timestamp</th>
-        <th scope="col"></th>
+        <th v-if="islogged"  scope="col"></th>
         <th scope="col">name</th>
         <th scope="col">message</th>
         <th scope="col">codeinfo</th>
@@ -72,11 +83,11 @@ const censorName = (id, name) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="donation in donations.slice().reverse()" :key="donation.id">
+      <tr v-for="donation in donations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
         <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
-        <td><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary">Mark</button></td>
+        <td v-if="islogged"><button @click="markDonationRead(donation.id)" type="submit" class="btn btn-primary"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
         <td>{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
-        <td><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
+        <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>
         <td>

@@ -144,6 +144,9 @@ background-color: black;
     z-index: 100;
 }
 
+.notread{
+    background-color: #5e2121;
+}
 
 .progresbarholder{
     margin: 20px 0;
