@@ -37,7 +37,8 @@ const setCurrentGame = (direction) => {
             })
     .then(() => {
       if (games.value.length){
-        game.value = games.value[streamMetaData.value.game + direction].game;
+        streamMetaData.value.game += direction
+        game.value = games.value[streamMetaData.value.game].game;
         setCurrentGameTwitch();
       }
     }).catch((err) => {
