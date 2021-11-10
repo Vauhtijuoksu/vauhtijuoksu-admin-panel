@@ -17,6 +17,17 @@ watch(streamMetaData, () => {
   }
 })
 
+const setCurrentGameTwitch = () => {
+  axios.get(`${url.value}/api/update_twitch_game`, {
+              auth: {
+                username: localStorage.getItem('username'),
+                password: localStorage.getItem('password')
+              }
+    }).catch((err) => {
+      console.log(err);
+    })
+}
+
 const setCurrentGame = (direction) => {
   axios.post(`${url.value}/api/game`, {game: streamMetaData.value.game + direction}, {
               auth: {
@@ -27,6 +38,7 @@ const setCurrentGame = (direction) => {
     .then(() => {
       if (games.value.length){
         game.value = games.value[streamMetaData.value.game + direction].game;
+        setCurrentGameTwitch();
       }
     }).catch((err) => {
       console.log(err);
