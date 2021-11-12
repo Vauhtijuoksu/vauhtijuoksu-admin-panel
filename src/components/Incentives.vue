@@ -24,8 +24,7 @@ function getIncentives() {
 function updateIncentives() {
   var html = "";
   for (var i in incentives["incentives"]) {
-
-    if (new Date(incentives["incentives"][i]["endtime"]) > Date.now()) {
+    if (new Date(incentives["incentives"][i]["endtime"]) > Date.now() - 1000*60*60*2) {
       var id = incentives["incentives"][i]["id"]
       var div = "";
       div += '<div class="incentive_game">' + incentives["incentives"][i]["game"] + '</div>';
@@ -85,7 +84,7 @@ function updateIncentives() {
         div += '">' + amount + 'e</div>';
 
       } else if (incentives["incentives"][i]["type"] === "open") {
-        if (i.toString() in Object.keys(incentives["amount"])) {
+        if (Object.keys(incentives["amount"]).indexOf(( 1 + parseInt(i) ).toString()) >= 0) {
           var keys = Object.keys(incentives["amount"][id]);
 
           var order = [];
