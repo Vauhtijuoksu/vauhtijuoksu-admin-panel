@@ -5,6 +5,14 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-  }
+    proxy: {
+      "/api": {
+        changeOrigin: true,
+        target: "https://api.dev.vauhtijuoksu.fi",
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        hostRewrite: "https://api.dev.vauhtijuoksu.fi"
+      }
+    },
+  },
 })
 

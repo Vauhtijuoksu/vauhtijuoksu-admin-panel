@@ -13,7 +13,7 @@ const goal = ref(0)
 let og_text = false
 watch(streamMetaData, () => {
   if (!og_text){
-    goal.value = streamMetaData.value.goal
+    goal.value = streamMetaData.value.donation_goal
     og_text = true
   }
 })

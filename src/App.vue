@@ -25,7 +25,7 @@ const games = ref([]);
 const streamMetaData = ref({});
 
 const getStreamMetaData = () => {
-  axios.get(`${urlLegacy}/api/stream_metadata`)
+  axios.get(`${url}/stream-metadata`)
       .then((response) => {
         streamMetaData.value = response.data;
       }).catch((err) => {
@@ -81,7 +81,7 @@ getGames();
     </div>
     <div id="admin" class="admin flex-row hidden">
       <div class="games">
-        <GameChanger :games="games" :url="urlLegacy" :streamMetaData="streamMetaData"/>
+        <GameChanger :games="games" :url="url" :legacyurl="urlLegacy" :streamMetaData="streamMetaData"/>
       </div>
       <div>
         <div class="flex-row">

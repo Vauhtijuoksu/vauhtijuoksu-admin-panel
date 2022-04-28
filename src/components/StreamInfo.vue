@@ -13,7 +13,7 @@ const info = ref('Loading...')
 let og_text = false
 watch(streamMetaData, () => {
   if (!og_text){
-    info.value = streamMetaData.value.info.join("\n")
+    info.value = streamMetaData.value.donatebar_info.join("\n")
     og_text = true
   }
 })

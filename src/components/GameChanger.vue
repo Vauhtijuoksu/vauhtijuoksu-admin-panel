@@ -5,20 +5,21 @@ import axios from 'axios'
 const props = defineProps({
   games: Object,
   url: String,
+  legacyurl: String,
   streamMetaData: Object
 })
 
-const { games, url, streamMetaData } = toRefs(props);
+const { games, url, legacyurl, streamMetaData } = toRefs(props);
 
 let game = ref("Loading...");
 watch(streamMetaData, () => {
   if (games.value.length){
-    game.value = games.value[streamMetaData.value.game].game
+    game.value = games.value.find(x => x.id === streamMetaData.value.current_game_id)
   }
 })
 
 const setCurrentGameTwitch = () => {
-  axios.get(`${url.value}/api/update_twitch_game`, {
+  axios.get(`${legacyurl.value}/api/update_twitch_game`, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')
@@ -29,7 +30,12 @@ const setCurrentGameTwitch = () => {
 }
 
 const setCurrentGame = (direction) => {
-  axios.post(`${url.value}/api/game`, {game: streamMetaData.value.game + direction}, {
+
+  const gameIndex = games.value.findIndex(x => x === game.value)
+  game.value = games.value[gameIndex + direction]
+  console.log(game.value.id)
+  
+  axios.patch(`${url.value}/stream-metadata`, {current_game_id: game.value.id}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')
@@ -37,8 +43,6 @@ const setCurrentGame = (direction) => {
             })
     .then(() => {
       if (games.value.length){
-        streamMetaData.value.game += direction
-        game.value = games.value[streamMetaData.value.game].game;
         setCurrentGameTwitch();
       }
     }).catch((err) => {
@@ -49,7 +53,7 @@ const setCurrentGame = (direction) => {
 
 <template>
 <div>
-  {{ game }}
+  {{ game.game }}
 </div>
 <button @click="setCurrentGame(-1)" type="submit" class="btn btn-primary">Edellinen</button>
 <button @click="setCurrentGame(1)" type="submit" class="btn btn-primary">Seuraava</button>

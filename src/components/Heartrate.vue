@@ -33,7 +33,7 @@ function getRate() {
     }
     xhr.send();
 }
-getRate()
+// getRate()
 
 
 </script>

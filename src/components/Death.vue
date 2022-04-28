@@ -17,19 +17,19 @@ watch(streamMetaData, () => {
   let id
   switch (player.value){
     case 1:
-      death.value = streamMetaData.value.death1;
+      death.value = streamMetaData.value.counters[0];
       id = "death1";
       break
     case 2:
-      death.value = streamMetaData.value.death2;
+      death.value = streamMetaData.value.counters[1];
       id = "death2";
       break
     case 3:
-      death.value = streamMetaData.value.death3;
+      death.value = streamMetaData.value.counters[2];
       id = "death3";
       break
     case 4:
-      death.value = streamMetaData.value.death4;
+      death.value = streamMetaData.value.counters[3];
       id = "death4"
       break
   }
