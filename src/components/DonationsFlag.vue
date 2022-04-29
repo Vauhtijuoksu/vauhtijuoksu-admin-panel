@@ -12,7 +12,8 @@ const { url } = toRefs(props);
 
 const set_donations_flag = (direction) => {
 
-  axios.patch(`${url.value}/player-info`, {message: "Lahjoituksia luettavana!"}, {
+  const timestamp = new Date();
+  axios.patch(`${url.value}/player-info`, {message: timestamp.toISOString() + " Lahjoituksia luettavana!"}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')

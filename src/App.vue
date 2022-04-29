@@ -22,6 +22,7 @@ const url = 'https://api.dev.vauhtijuoksu.fi';
 const donations = ref([]);
 const games = ref([]);
 const streamMetaData = ref({});
+const incentives = ref({});
 
 const getStreamMetaData = () => {
   axios.get(`${url}/stream-metadata`)
@@ -43,6 +44,16 @@ const getDonations = () => {
   setTimeout(getDonations, 3000);
 }
 
+const getIncentives = () => {
+  axios.get(`${url}/incentives`)
+      .then((response) => {
+        incentives.value = response.data;
+      }).catch((err) => {
+    console.log(err);
+  });
+  setTimeout(getDonations, 6000);
+}
+
 const getGames = () => {
   axios.get(`${url}/gamedata`)
       .then((response) => {
@@ -62,6 +73,7 @@ onMounted(()=> {
 getStreamMetaData();
 getDonations();
 getGames();
+getIncentives();
 </script>
 
 <template>
@@ -106,7 +118,7 @@ getGames();
         <Donations :url="url" :donations="donations"/>
       </div>
       <div class="scrollable incentives">
-        <Incentives/>
+        <Incentives :incentives="incentives"/>
       </div>
     </div>
   </div>
