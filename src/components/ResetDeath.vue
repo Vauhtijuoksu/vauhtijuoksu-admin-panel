@@ -12,7 +12,7 @@ const { url, streamMetaData } = toRefs(props);
 
 const resetDeaths = (direction) => {
 
-  axios.post(`${url.value}/api/death_reset`, {}, {
+  axios.patch(`${url.value}/stream-metadata`, {counters: [-1, -1, -1, -1]}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')

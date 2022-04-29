@@ -43,7 +43,9 @@ watch(streamMetaData, () => {
 
 const setCurrentDeaths = (direction) => {
 
-  axios.post(`${url.value}/api/death`, {player: player.value -1, death_add: direction}, {
+  streamMetaData.value.counters[player.value - 1] = streamMetaData.value.counters[player.value - 1] + direction
+
+  axios.patch(`${url.value}/stream-metadata`, {counters: streamMetaData.value.counters}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')
@@ -54,7 +56,7 @@ const setCurrentDeaths = (direction) => {
         death.value = 0;
         document.getElementById(player.value - 1).classList.remove("death-off");
       } else {
-        death.value = death.value + response.data.death_add;
+        death.value = streamMetaData.value.counters[player.value -1];
       }
     }).catch((err) => {
       console.log(err);

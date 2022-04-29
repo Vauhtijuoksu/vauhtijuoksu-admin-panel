@@ -33,7 +33,6 @@ const setCurrentGame = (direction) => {
 
   const gameIndex = games.value.findIndex(x => x === game.value)
   game.value = games.value[gameIndex + direction]
-  console.log(game.value.id)
   
   axios.patch(`${url.value}/stream-metadata`, {current_game_id: game.value.id}, {
               auth: {

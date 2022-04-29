@@ -12,7 +12,7 @@ const { url } = toRefs(props);
 
 const set_donations_flag = (direction) => {
 
-  axios.get(`${url.value}/api/set_donations_flag`, {
+  axios.patch(`${url.value}/player-info`, {message: "Lahjoituksia luettavana!"}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')

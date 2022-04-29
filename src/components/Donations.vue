@@ -4,11 +4,10 @@ import axios from 'axios'
 
 const props = defineProps({
   url: String,
-  legacyurl: String,
   donations: Object
 })
 
-const { url, legacyurl, donations } = toRefs(props);
+const { url, donations } = toRefs(props);
 
 const incentiveinfo = ref({});
 
@@ -24,7 +23,7 @@ onMounted(()=> {
 })
 
 const getIncentiveInfo = () => {
-  axios.get(`${legacyurl.value}/api/incentive_code_info`)
+  axios.get(`${url.value}/incentives`)
       .then((response) => {
         incentiveinfo.value = response.data;
       }).catch((err) => {

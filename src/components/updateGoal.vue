@@ -19,7 +19,7 @@ watch(streamMetaData, () => {
 })
 
 const postStreamInfo = () => {
-  axios.post(`${url.value}/api/goal`, {goal: goal.value}, {
+  axios.patch(`${url.value}/stream-metadata`, {donation_goal: goal.value}, {
               auth: {
                 username: localStorage.getItem('username'),
                 password: localStorage.getItem('password')

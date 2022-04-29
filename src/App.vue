@@ -18,7 +18,6 @@ import Incentives from "./components/Incentives.vue";
 import DonationsFlag from "./components/DonationsFlag.vue";
 
 const url = 'https://api.dev.vauhtijuoksu.fi';
-const urlLegacy = 'https://legacy.vauhtijuoksu.fi';
 
 const donations = ref([]);
 const games = ref([]);
@@ -81,30 +80,30 @@ getGames();
     </div>
     <div id="admin" class="admin flex-row hidden">
       <div class="games">
-        <GameChanger :games="games" :url="url" :legacyurl="urlLegacy" :streamMetaData="streamMetaData"/>
+        <GameChanger :games="games" :url="url" :streamMetaData="streamMetaData"/>
       </div>
       <div>
         <div class="flex-row">
-          <Death :url="urlLegacy" :streamMetaData="streamMetaData" :player="1"/>
-          <Death :url="urlLegacy" :streamMetaData="streamMetaData" :player="2"/>
-          <Death :url="urlLegacy" :streamMetaData="streamMetaData" :player="3"/>
-          <Death :url="urlLegacy" :streamMetaData="streamMetaData" :player="4"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="1"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="2"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="3"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="4"/>
         </div>
-        <ResetDeath :url="urlLegacy"/>
+        <ResetDeath :url="url"/>
       </div>
       <div class="stream-info">
-        <StreamInfo :url="urlLegacy" :streamMetaData="streamMetaData"/>
+        <StreamInfo :url="url" :streamMetaData="streamMetaData"/>
       </div>
       <div class="donflag">
-        <DonationsFlag :url="urlLegacy"/>
+        <DonationsFlag :url="url"/>
       </div>
       <div>
-        <updateGoal :url="urlLegacy" :streamMetaData="streamMetaData"/>
+        <updateGoal :url="url" :streamMetaData="streamMetaData"/>
       </div>
     </div>
     <div class="info flex-row item">
       <div class="scrollable donations">
-        <Donations :url="url" :legacyurl="urlLegacy" :donations="donations"/>
+        <Donations :url="url" :donations="donations"/>
       </div>
       <div class="scrollable incentives">
         <Incentives/>
