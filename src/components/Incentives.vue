@@ -18,15 +18,18 @@ const { incentives } = toRefs(props);
       <p>{{ incentive.info }}</p>
       <p>Sulkeutuu: {{new Date(incentive.end_time).toLocaleString("fi-FI")}}</p>
       <div v-if="incentive.type === 'milestone'">
+          Tilanne/Tavoite: <br>
           {{incentive.total_amount}}e / {{incentive.milestones[0]}}e
       </div>
       <div v-if="incentive.type === 'option'">
+      Vaihtoehdot: <br>
       <tr v-for="status in incentive.status" :key="status">
         {{status.option}}
         {{status.amount}}e
       </tr>
       </div>
       <div v-if="incentive.type === 'open'">
+      Ehdotukset: <br>
       <tr v-for="status in incentive.status" :key="status">
         {{status.option}}
         {{status.amount}}e
