@@ -4,12 +4,12 @@ import axios from 'axios'
 
 const props = defineProps({
   url: String,
-  donations: Object
+  donations: Object,
+  incentives: Object
 })
 
-const { url, donations } = toRefs(props);
+const { url, donations, incentives } = toRefs(props);
 
-const incentiveinfo = ref({});
 
 const username = ref(localStorage.getItem('username'));
 
@@ -22,16 +22,6 @@ onMounted(()=> {
   }
 })
 
-const getIncentiveInfo = () => {
-  axios.get(`${url.value}/incentives`)
-      .then((response) => {
-        incentiveinfo.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
-  setTimeout(getIncentiveInfo, 3000);
-}
-getIncentiveInfo()
 
 
 const markDonation = (id, readValue) => {
@@ -95,9 +85,9 @@ const censorName = (id, name) => {
           <div class="incentive_info">
             📄
             <div v-if="donation.message">
-              <div v-for="code in Object.keys(incentiveinfo)">
+              <div v-for="code in Object.keys(incentives)" :key="code">
                 <div v-if="donation.message.includes(code)">
-                  <div v-for="info in incentiveinfo[code]">
+                  <div v-for="info in incentives[code]" :key="info">
                     {{ info }}
                   </div>
                 </div>

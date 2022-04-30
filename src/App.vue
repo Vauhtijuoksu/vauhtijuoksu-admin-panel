@@ -51,7 +51,7 @@ const getIncentives = () => {
       }).catch((err) => {
     console.log(err);
   });
-  setTimeout(getDonations, 6000);
+  setTimeout(getIncentives, 6000);
 }
 
 const getGames = () => {
@@ -115,7 +115,7 @@ getIncentives();
     </div>
     <div class="info flex-row item">
       <div class="scrollable donations">
-        <Donations :url="url" :donations="donations"/>
+        <Donations :url="url" :donations="donations" :incentives="incentives"/>
       </div>
       <div class="scrollable incentives">
         <Incentives :incentives="incentives"/>
