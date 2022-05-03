@@ -14,8 +14,13 @@ const { incentives, gamedata } = toRefs(props);
 
 <template>
   <tr v-for="incentive in incentives" :key="incentive.id">
-    <div v-if="new Date(incentive.end_time) >= new Date()">
-      <h4>{{ incentive.title }}</h4>
+    <div v-if="new Date(incentive.end_time) >= new Date(new Date().getTime() + 60 * 60000)">
+      <div v-if="new Date(incentive.end_time) >= new Date()">
+        <h4>{{ incentive.title }}</h4>
+      </div>
+      <div v-else>
+        <h4 class="text-danger">{{ incentive.title }}</h4>
+      </div>
       <p>{{ incentive.info }}</p>
 
       <div v-if="gamedata.length">
@@ -46,4 +51,7 @@ const { incentives, gamedata } = toRefs(props);
 </template>
 
 <style scoped>
+  #selector{
+    color:lightgrey;
+  }
 </style>
