@@ -8,7 +8,8 @@ export default defineConfig({
     proxy: {
       "/api": {
         changeOrigin: true,
-        target: "https://api.dev.vauhtijuoksu.fi",
+        secure: false,
+        target: "http://localhost",
         rewrite: (path) => path.replace(/^\/api/, ''),
         hostRewrite: "https://api.dev.vauhtijuoksu.fi"
       }

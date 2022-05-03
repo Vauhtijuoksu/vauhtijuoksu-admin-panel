@@ -84,11 +84,15 @@ const censorName = (id, name) => {
         <td>
           <div class="incentive_info">
             📄
-            <div v-if="donation.message">
-              <div v-for="code in Object.keys(incentives)" :key="code">
-                <div v-if="donation.message.includes(code)">
-                  <div v-for="info in incentives[code]" :key="info">
-                    {{ info }}
+            <div v-if="donation.incentives.length">
+              <div v-for="incentive in donation.incentives" :key="incentive.code">
+                <div v-for="chosen_incentive in incentive.chosen_incentives" :key="chosen_incentive.incentive_id">
+                  <div v-if="incentives.length">
+                    <h5>{{incentives.find(x => x.id === chosen_incentive.incentive_id).title}}:</h5>
+                    <p>{{chosen_incentive.parameter}}
+                    {{(donation.amount / donation.incentives.length /
+                    incentive.chosen_incentives.length).toFixed(2)
+                    }}e</p>
                   </div>
                 </div>
               </div>

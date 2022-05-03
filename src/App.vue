@@ -118,7 +118,7 @@ getIncentives();
         <Donations :url="url" :donations="donations" :incentives="incentives"/>
       </div>
       <div class="scrollable incentives">
-        <Incentives :incentives="incentives"/>
+        <Incentives :incentives="incentives" :gamedata="games"/>
       </div>
     </div>
   </div>
