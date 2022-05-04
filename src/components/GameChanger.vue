@@ -1,6 +1,12 @@
 <script setup>
 import { watch, ref, toRefs } from 'vue'
 import axios from 'axios'
+import TwitchJs from 'twitch-js'
+
+const clientId = localStorage.getItem('twitch_client_id')
+const token = localStorage.getItem('twitch_access_token')
+
+const { api } = new TwitchJs({ token, clientId })
 
 const props = defineProps({
   games: Object,
@@ -9,7 +15,7 @@ const props = defineProps({
   streamMetaData: Object
 })
 
-const { games, url, legacyurl, streamMetaData } = toRefs(props);
+const { games, url, streamMetaData } = toRefs(props);
 
 let game = ref("Loading...");
 watch(streamMetaData, () => {
@@ -18,15 +24,31 @@ watch(streamMetaData, () => {
   }
 })
 
-const setCurrentGameTwitch = () => {
-  axios.get(`${legacyurl.value}/api/update_twitch_game`, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-    }).catch((err) => {
-      console.log(err);
-    })
+const setCurrentGameTwitch = async (gameName) => {
+  try {
+    const userData = await api.get('users')
+    const userId = userData.data[0].id
+    const gameData = await api.get('games', {'search': {'name': gameName}})
+    let gameId = '509658'
+    if(gameData.data.length){
+      gameId = gameData.data[0].id
+    }
+    console.log(gameId)
+    const response = await axios.patch(`https://api.twitch.tv/helix/channels?broadcaster_id=${userId}`, {game_id: gameId}, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('twitch_access_token')}`,
+          'Client-Id': localStorage.getItem('twitch_client_id')
+        }
+      })
+  } catch (error) {
+    console.log(error)
+    if (error.response.status === '401') {
+      localStorage.removeItem('twitch_client_id')
+      localStorage.removeItem('twitch_access_token')
+      location.reload();
+    }
+
+  }
 }
 
 const setCurrentGame = (direction) => {
@@ -42,7 +64,7 @@ const setCurrentGame = (direction) => {
             })
     .then(() => {
       if (games.value.length){
-        setCurrentGameTwitch();
+        setCurrentGameTwitch(game.value.game);
       }
     }).catch((err) => {
       console.log(err);
