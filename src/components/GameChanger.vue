@@ -6,7 +6,9 @@ import TwitchJs from 'twitch-js'
 const clientId = localStorage.getItem('twitch_client_id')
 const token = localStorage.getItem('twitch_access_token')
 
-const { api } = new TwitchJs({ token, clientId })
+if (clientId && token){
+  const { api } = new TwitchJs({ token, clientId })
+}
 
 const props = defineProps({
   games: Object,
@@ -64,7 +66,9 @@ const setCurrentGame = (direction) => {
             })
     .then(() => {
       if (games.value.length){
-        setCurrentGameTwitch(game.value.game);
+        if (clientId && token){
+          setCurrentGameTwitch(game.value.game);
+        }
       }
     }).catch((err) => {
       console.log(err);
