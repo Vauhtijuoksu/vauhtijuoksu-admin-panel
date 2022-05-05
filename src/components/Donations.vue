@@ -4,11 +4,12 @@ import axios from 'axios'
 
 const props = defineProps({
   url: String,
+  games: Object,
   donations: Object,
   incentives: Object
 })
 
-const { url, donations, incentives } = toRefs(props);
+const { url, games, donations, incentives } = toRefs(props);
 
 
 const username = ref(localStorage.getItem('username'));
@@ -87,7 +88,8 @@ const censorName = (id, name) => {
             <div v-if="donation.incentives.length">
               <div v-for="incentive in donation.incentives" :key="incentive.code">
                 <div v-for="chosen_incentive in incentive.chosen_incentives" :key="chosen_incentive.incentive_id">
-                  <div v-if="incentives.length">
+                  <div v-if="incentives.length && games.length">
+                    <h5>{{games.find(x => x.id === incentives.find(x => x.id === chosen_incentive.incentive_id).game_id).game}}</h5>
                     <h5>{{incentives.find(x => x.id === chosen_incentive.incentive_id).title}}:</h5>
                     <p>{{chosen_incentive.parameter}}
                     {{(donation.amount / donation.incentives.length /
