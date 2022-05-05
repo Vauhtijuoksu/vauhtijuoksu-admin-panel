@@ -45,8 +45,8 @@ const { incentives, gamedata } = toRefs(props);
         {{status.amount.toFixed(2)}}e
       </tr>
       </div>
+      <hr/>
     </div>
-    <hr/>
   </tr>
 </template>
 
