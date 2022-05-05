@@ -6,8 +6,10 @@ import TwitchJs from 'twitch-js'
 const clientId = localStorage.getItem('twitch_client_id')
 const token = localStorage.getItem('twitch_access_token')
 
+let api;
+
 if (clientId && token){
-  const { api } = new TwitchJs({ token, clientId })
+  api = new TwitchJs({ token, clientId }).api
 }
 
 const props = defineProps({
