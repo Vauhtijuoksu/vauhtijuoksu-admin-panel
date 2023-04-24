@@ -28,16 +28,11 @@ watch(streamMetaData, () => {
   }
 })
 
-const setCurrentGameTwitch = async (gameName) => {
+const setCurrentGameTwitch = async (gameTwitchId) => {
   try {
     const userData = await api.get('users')
     const userId = userData.data[0].id
-    const gameData = await api.get('games', {'search': {'name': gameName}})
-    let gameId = '509658'
-    if(gameData.data.length){
-      gameId = gameData.data[0].id
-    }
-    console.log(gameId)
+    const gameId = gameTwitchId;
     const response = await axios.patch(`https://api.twitch.tv/helix/channels?broadcaster_id=${userId}`, {game_id: gameId}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('twitch_access_token')}`,
@@ -69,7 +64,7 @@ const setCurrentGame = (direction) => {
     .then(() => {
       if (games.value.length){
         if (clientId && token){
-          setCurrentGameTwitch(game.value.game);
+          setCurrentGameTwitch(game.value.meta);
         }
       }
     }).catch((err) => {

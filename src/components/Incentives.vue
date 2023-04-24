@@ -23,7 +23,7 @@ const { incentives, gamedata } = toRefs(props);
       </div>
       <p>{{ incentive.info }}</p>
 
-      <div v-if="gamedata.length">
+      <div v-if="gamedata.length && incentive.game_id">
         <p>Peli: {{gamedata.find(x => x.id === incentive.game_id).game}}</p>
       </div>
       <p>Sulkeutuu: {{new Date(incentive.end_time).toLocaleString("fi-FI")}}</p>
