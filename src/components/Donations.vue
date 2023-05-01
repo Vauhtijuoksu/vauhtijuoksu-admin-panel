@@ -101,7 +101,7 @@ const censorName = (id, name) => {
             </div>
           </div>
         </td>
-        <td>{{ donation.amount }}</td>
+        <td>{{ donation.amount }}e</td>
       </tr>
     </tbody>
   </table>
