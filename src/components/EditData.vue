@@ -31,7 +31,12 @@ const getGames = () => {
 }
 
 const postGame = (game) => {
-  axios.post(`${url}/gamedata`, game)
+  axios.post(`${url}/gamedata`, game, {
+    auth: {
+      username: localStorage.getItem('username'),
+      password: localStorage.getItem('password')
+    }
+  })
     .then((response) => {
       console.log(response)
     }).catch((err) => {
@@ -41,7 +46,12 @@ const postGame = (game) => {
 }
 
 const deleteGame = (id) => {
-  axios.delete(`${url}/gamedata/${id}`)
+  axios.delete(`${url}/gamedata/${id}`, {
+    auth: {
+      username: localStorage.getItem('username'),
+      password: localStorage.getItem('password')
+    }
+  })
     .then((response) => {
       console.log(response)
     }).catch((err) => {
@@ -51,7 +61,12 @@ const deleteGame = (id) => {
 }
 
 const patchGame = (id, game) => {
-  axios.patch(`${url}/gamedata/${id}`, game)
+  axios.patch(`${url}/gamedata/${id}`, game, {
+    auth: {
+      username: localStorage.getItem('username'),
+      password: localStorage.getItem('password')
+    }
+  })
     .then((response) => {
       console.log(response)
     }).catch((err) => {
@@ -100,7 +115,6 @@ const remove = (game) => {
   } else {
     changes.value.delete.push(game.id)
   }
-  console.log(changes.value)
 }
 
 const removeAdded = (game) => {
@@ -117,7 +131,6 @@ const saveChanges = () => {
   } else {
     changes.value.post.push(selectedGame.value)
   }
-  console.log(JSON.stringify(changes.value))
   mode.value = "list"
 }
 
