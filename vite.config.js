@@ -6,14 +6,12 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      "/api": {
+      '/api': {
+        target: "https://api.dev.vauhtijuoksu.fi",
         changeOrigin: true,
-        secure: false,
-        target: "http://localhost",
         rewrite: (path) => path.replace(/^\/api/, ''),
-        hostRewrite: "https://api.dev.vauhtijuoksu.fi"
-      }
+      },
     },
-  },
+  }
 })
 
