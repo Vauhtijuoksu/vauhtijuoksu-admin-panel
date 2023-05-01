@@ -30,49 +30,40 @@ const getGames = () => {
   });
 }
 
-const postGame = (game) => {
-  axios.post(`${url}/gamedata`, game, {
+const postGame = async (game) => {
+  return axios.post(`${url}/gamedata`, game, {
     auth: {
       username: localStorage.getItem('username'),
       password: localStorage.getItem('password')
     }
-  })
-    .then((response) => {
-      console.log(response)
-    }).catch((err) => {
+  }).catch((err) => {
       console.log(err);
       alert("Something went wrong, refresh page and see damages")
     });
 }
 
-const deleteGame = (id) => {
-  axios.delete(`${url}/gamedata/${id}`, {
+const deleteGame = async (id) => {
+  return axios.delete(`${url}/gamedata/${id}`, {
     auth: {
       username: localStorage.getItem('username'),
       password: localStorage.getItem('password')
     }
-  })
-    .then((response) => {
-      console.log(response)
-    }).catch((err) => {
+  }).catch((err) => {
       console.log(err);
       alert("Something went wrong, refresh page and see damages")
     });
 }
 
-const patchGame = (id, game) => {
-  axios.patch(`${url}/gamedata/${id}`, game, {
+const patchGame = async (id, game) => {
+  return axios.patch(`${url}/gamedata/${id}`, game, {
     auth: {
       username: localStorage.getItem('username'),
       password: localStorage.getItem('password')
     }
-  })
-    .then((response) => {
-      console.log(response)
-    }).catch((err) => {
-      console.log(err);
-      alert("Something went wrong, refresh page and see damages")
-    });
+  }).catch((err) => {
+    console.log(err);
+    alert("Something went wrong, refresh page and see damages")
+  });
 }
 
 const getPlayers = () => {
@@ -138,7 +129,7 @@ const changeView = (view) => {
   mode.value = view
 }
 
-const changesToProd = () => {
+const changesToProd = async () => {
   const conf = confirm('Do you want these changes to prod?');
   if (conf){
 
@@ -162,11 +153,13 @@ const changesToProd = () => {
     })
 
     for (const key in changes.value.patch) {
-      patchGame(key, changes.value.patch[key])
+      await patchGame(key, changes.value.patch[key])
     }
 
-    changes.value.post.map(game => postGame(game))
-    changes.value.delete.map(id => deleteGame(id))
+    const posts = changes.value.post.map(game => postGame(game))
+    const deletes = changes.value.delete.map(id => deleteGame(id))
+
+    await Promise.all([...posts, ...deletes]);
 
     changes.value = {
       patch: {},
