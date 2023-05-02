@@ -1,6 +1,7 @@
 <script setup>
 import {onMounted, ref, toRefs, watch} from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   url: String,
@@ -8,6 +9,8 @@ const props = defineProps({
   donations: Object,
   incentives: Object
 })
+
+const router = useRouter()
 
 const { url, games, donations, incentives } = toRefs(props);
 
@@ -70,6 +73,7 @@ const censorName = (id, name) => {
         <th v-if="islogged"  scope="col"></th>
         <th scope="col">name</th>
         <th scope="col">message</th>
+        <th scope="col">edit</th>
         <th scope="col">codeinfo</th>
         <th scope="col">amount</th>
       </tr>
@@ -82,6 +86,7 @@ const censorName = (id, name) => {
         <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>{{ donation.message }}</td>
+        <td><span @click="router.push(`/edit/donation/${donation.id}`)" title='Edit donation message'>✏️</span></td>
         <td>
           <div class="incentive_info">
             📄

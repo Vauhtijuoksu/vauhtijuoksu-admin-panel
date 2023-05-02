@@ -4,6 +4,7 @@ import EditMain from './components/EditMain.vue'
 import EditGameData from './components/EditGameData.vue'
 import EditIncentives from './components/EditIncentives.vue'
 import EditPlayers from './components/EditPlayers.vue'
+import EditDonation from './components/EditDonation.vue'
 
 export default createRouter({
   history: createWebHistory(),
@@ -27,6 +28,10 @@ export default createRouter({
     {
       path: '/edit/players',
       component: EditPlayers,
+    },
+    {
+      path: '/edit/donation/:id',
+      component: EditDonation,
     },
   ]
 })
