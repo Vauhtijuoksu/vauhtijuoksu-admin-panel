@@ -23,6 +23,8 @@ const games = ref([]);
 const streamMetaData = ref({});
 const incentives = ref({});
 
+const showEightCounters = ref(false);
+
 const getStreamMetaData = () => {
   axios.get(`${url}/stream-metadata`)
       .then((response) => {
@@ -101,7 +103,15 @@ getIncentives();
           <Death :url="url" :streamMetaData="streamMetaData" :player="3"/>
           <Death :url="url" :streamMetaData="streamMetaData" :player="4"/>
         </div>
+        <div v-if="showEightCounters" class="flex-row">
+          <Death :url="url" :streamMetaData="streamMetaData" :player="5"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="6"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="7"/>
+          <Death :url="url" :streamMetaData="streamMetaData" :player="8"/>
+        </div>
         <ResetDeath :url="url"/>
+        <span v-if="!showEightCounters" @click="showEightCounters = true" title="näytä lisää laskureita">⬇️</span>
+        <span v-if="showEightCounters" @click="showEightCounters = false" title="piilota laskurit">⬆️️</span>
       </div>
       <div class="stream-info">
         <StreamInfo :url="url" :streamMetaData="streamMetaData"/>

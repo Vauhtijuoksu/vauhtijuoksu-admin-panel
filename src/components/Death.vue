@@ -14,25 +14,9 @@ const { url, streamMetaData, player } = toRefs(props);
 let death = ref("-");
 
 watch(streamMetaData, () => {
-  let id
-  switch (player.value){
-    case 1:
-      death.value = streamMetaData.value.counters[0];
-      id = "death1";
-      break
-    case 2:
-      death.value = streamMetaData.value.counters[1];
-      id = "death2";
-      break
-    case 3:
-      death.value = streamMetaData.value.counters[2];
-      id = "death3";
-      break
-    case 4:
-      death.value = streamMetaData.value.counters[3];
-      id = "death4"
-      break
-  }
+  death.value = streamMetaData.value.counters[player.value - 1];
+  const id = `death${player.value}`;
+
   if (parseInt(death.value) < 0){
     death.value="OFF"
     document.getElementById(id).classList.add("death-off")
@@ -45,18 +29,18 @@ const setCurrentDeaths = (direction) => {
 
   streamMetaData.value.counters[player.value - 1] = streamMetaData.value.counters[player.value - 1] + direction
 
-  axios.patch(`${url.value}/stream-metadata`, {counters: streamMetaData.value.counters}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
+  axios.patch(`${url.value}/stream-metadata`, { counters: streamMetaData.value.counters }, {
+    auth: {
+      username: localStorage.getItem('username'),
+      password: localStorage.getItem('password')
+    }
+  })
     .then((response) => {
-      if (death.value === "OFF"){
+      if (death.value === "OFF") {
         death.value = 0;
         document.getElementById(player.value - 1).classList.remove("death-off");
       } else {
-        death.value = streamMetaData.value.counters[player.value -1];
+        death.value = streamMetaData.value.counters[player.value - 1];
       }
     }).catch((err) => {
       console.log(err);
