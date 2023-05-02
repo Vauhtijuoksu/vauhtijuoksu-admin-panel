@@ -94,7 +94,7 @@ const openEdit = (incentive) => {
 
 const openAdd = () => {
   selectedIncentive.value = {
-    game_id: "",
+    game_id: games.value[0].id,
     title: "example title",
     info: "example info",
     end_time: new Date().toLocaleString("fi-FI"),
@@ -222,13 +222,16 @@ getGames();
   <div v-else-if="mode === 'form'">
     <form>
       <div class="mb-3">
-          <label for="game" class="form-label">Game</label>
-          <select class="form-select" v-model="selectedIncentive.game_id">
-            <option value="">Nothing (game is not linked to this incentive)</option>
-            <option v-for="game in games" :key="game.id" :value="game.id">
-              {{ game.game }}
-            </option>
-          </select>
+          <div v-if="'game_id' in selectedIncentive" class="mb-3">
+            <label for="game" class="form-label">Game</label>
+            <select class="form-select" v-model="selectedIncentive.game_id">
+              <option v-for="game in games" :key="game.id" :value="game.id">
+                {{ game.game }}
+              </option>
+            </select>
+            <span @click="delete selectedIncentive.game_id" title="poista game_id">❌</span>
+          </div>
+            <span @click="selectedIncentive.game_id = games[0].id" title="lisää game_id">🆕</span>
       </div>
       <div class="mb-3">
           <label for="title" class="form-label">Title</label>
