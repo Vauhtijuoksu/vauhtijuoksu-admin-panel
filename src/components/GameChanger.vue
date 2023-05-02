@@ -30,20 +30,24 @@ watch(streamMetaData, () => {
 
 const setCurrentGameTwitch = async (gameTwitchId) => {
   try {
-    const userData = await api.get('users')
-    const userId = userData.data[0].id
+    if (localStorage.getItem('twitch_user') === null) {
+      const userData = await api.get('users')
+      localStorage.setItem('twitch_user', userData.data[0].id)
+    }
     const gameId = gameTwitchId;
-    const response = await axios.patch(`https://api.twitch.tv/helix/channels?broadcaster_id=${userId}`, {game_id: gameId}, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('twitch_access_token')}`,
-          'Client-Id': localStorage.getItem('twitch_client_id')
-        }
-      })
+    const response = await axios.patch(`https://api.twitch.tv/helix/channels?broadcaster_id=${localStorage.getItem('twitch_user')}`, { game_id: gameId }, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('twitch_access_token')}`,
+        'Client-Id': localStorage.getItem('twitch_client_id')
+      }
+    })
   } catch (error) {
     console.log(error)
-    if (error.response.status === '401') {
+    if (error.response.status === 401) {
+      alert("Twitch authentication did not work, please re-auth at top right 'Connect with Twitch' link")
       localStorage.removeItem('twitch_client_id')
       localStorage.removeItem('twitch_access_token')
+      localStorage.removeItem('twitch_user')
       location.reload();
     }
 
