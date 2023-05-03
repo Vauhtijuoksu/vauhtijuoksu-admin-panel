@@ -133,8 +133,12 @@ const addOptionParameter = (incentive) => {
 
 const saveChanges = () => {
   if ("id" in selectedIncentive.value) {
-    changes.value.patch[selectedIncentive.value.id] = selectedIncentive.value
-    changes.value.patch[selectedIncentive.value.id].id = undefined
+    changes.value.patch[selectedIncentive.value.id] = {
+      game_id: selectedIncentive.value.game_id,
+      title: selectedIncentive.value.title,
+      info: selectedIncentive.value.info,
+      end_time: selectedIncentive.value.end_time,
+    }
 
     selectedIncentive.value = {}
   } else {
