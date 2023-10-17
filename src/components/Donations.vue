@@ -29,12 +29,7 @@ onMounted(()=> {
 
 
 const markDonation = (id, readValue) => {
-  axios.patch(`${url.value}/donations/${id}`, {read: readValue}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
+  axios.patch(`${url.value}/donations/${id}`, {read: readValue})
     .then(() => {
       let obj = donations.value.find(x => x.id === id);
       let index = donations.value.indexOf(obj);
