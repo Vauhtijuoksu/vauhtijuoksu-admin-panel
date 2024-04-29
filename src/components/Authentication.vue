@@ -49,10 +49,6 @@ if (document.location.hash.split('&')[0].split('=')[0] === '#access_token'){
   <div id="twitch">
     <div v-if="!twitchAccesssToken">
       <a :href=twitchUrl>Connect with Twitch</a>
-      <a href="https://api.dev.vauhtijuoksu.fi/login" referrerpolicy="unsafe-url"> login</a>
-      <form action="https://api.dev.vauhtijuoksu.fi/logout" method="post">
-        <button name="logout">logout</button>
-      </form>
     </div>
   </div>
   <div id="login" class="no-login">
