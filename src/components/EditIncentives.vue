@@ -157,14 +157,14 @@ const changesToProd = async () => {
 
     for (const key in changes.value.patch) {
       const end_time_temp = changes.value.patch[key].end_time;
-      changes.value.patch[key].end_time = DateTime.fromFormat(end_time_temp, "d.M.y H.m.s", { locale: "fi" }).toISO();
+      changes.value.patch[key].end_time = DateTime.fromFormat(end_time_temp.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
       if (changes.value.patch[key].end_time == undefined) {
         alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
         throw Error("timestamps did not work out");
       }
     }
     changes.value.post.map(incentive => {
-      incentive.end_time = DateTime.fromFormat(incentive.end_time, "d.M.y H.m.s", { locale: "fi" }).toISO();
+      incentive.end_time = DateTime.fromFormat(incentive.end_time.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
       if (incentive.end_time == undefined) {
         alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
         throw Error("timestamps did not work out");
