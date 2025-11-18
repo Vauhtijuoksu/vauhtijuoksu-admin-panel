@@ -24,6 +24,7 @@ const getGames = () => {
         games.value.map(game => {
           game.start_time = new Date(game.start_time).toLocaleString("fi-FI")
           game.end_time = new Date(game.end_time).toLocaleString("fi-FI")
+          delete game.players;
         })
       }).catch((err) => {
     console.log(err);
