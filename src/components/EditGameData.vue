@@ -7,7 +7,7 @@ import { DateTime } from 'luxon';
 const url = 'https://api.dev.vauhtijuoksu.fi';
 
 const games = ref([]);
-const players = ref([]);
+const participants = ref([]);
 const selectedGame = ref({})
 const changes = ref({
   patch: {},
@@ -24,7 +24,6 @@ const getGames = () => {
         games.value.map(game => {
           game.start_time = new Date(game.start_time).toLocaleString("fi-FI")
           game.end_time = new Date(game.end_time).toLocaleString("fi-FI")
-          delete game.participants
         })
       }).catch((err) => {
     console.log(err);
@@ -67,10 +66,10 @@ const patchGame = async (id, game) => {
   });
 }
 
-const getPlayers = () => {
-  axios.get(`${url}/players`)
+const getParticipants = () => {
+  axios.get(`${url}/participants`)
       .then((response) => {
-        players.value = response.data;
+        participants.value = response.data;
       }).catch((err) => {
     console.log(err);
   });
@@ -96,7 +95,7 @@ const openAdd = () => {
     published: "2022 (for example)",
     img_filename: "example.png",
     meta: "8676 (twitch game id for example)",
-    players: [],
+    participants: [],
   }
   mode.value = "form"
 }
@@ -167,7 +166,7 @@ const changesToProd = async () => {
       post: [],
       delete: [],
     }
-    getPlayers()
+    getParticipants()
     getGames()
     changeView('list')
   }
@@ -175,7 +174,7 @@ const changesToProd = async () => {
 
 
 getGames();
-getPlayers();
+getParticipants();
 </script>
 
 <template>
@@ -242,16 +241,17 @@ getPlayers();
           <input type="text" class="form-control" id="meta" name="meta" v-model='selectedGame.meta'>
       </div>
       <div class="mb-3">
-        <label for="players" class="form-label">players</label>
-        <div v-for="(_, index)  in selectedGame.players">
-          <select class="form-select" v-model="selectedGame.players[index]">
-            <option v-for="player in players" :key="player.id" :value="player.id">
-              {{ player.display_name }}
+        <label for="participants" class="form-label">Participants</label>
+        <div v-for="(participant, index) in selectedGame.participants" :key="index">
+          <select class="form-select" v-model="participant.participant_id">
+            <option v-for="p in participants" :key="p.id" :value="p.id">
+              {{ p.display_name }}
             </option>
           </select>
-          <span @click="selectedGame.players.splice(index, 1)" title="poista pelaaja">❌</span>
+          <input type="text" class="form-control" v-model="participant.role" placeholder="Role (e.g., PLAYER, COMMENTATOR, HOST)">
+          <span @click="selectedGame.participants.splice(index, 1)" title="poista osallistuja">❌</span>
         </div>
-        <span @click="selectedGame.players.push(players[0].id)" title="lisää uusi pelaaja">🆕</span>
+        <span @click="selectedGame.participants.push({ participant_id: participants[0]?.id, role: 'PLAYER' })" title="lisää uusi osallistuja">🆕</span>
       </div>
       <button @click.prevent="saveChanges()" class="btn btn-primary">Submit</button>
       <button @click="changeView('list')" class="btn btn-primary">Discard</button>

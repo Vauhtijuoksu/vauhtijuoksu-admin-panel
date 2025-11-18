@@ -9,7 +9,7 @@
     <router-link to="/edit/incentives">Incentives</router-link>
   </h2>
   <h2>
-    <router-link to="/edit/players">Players</router-link>
+    <router-link to="/edit/participants">Participants</router-link>
   </h2>
 </template>
 
