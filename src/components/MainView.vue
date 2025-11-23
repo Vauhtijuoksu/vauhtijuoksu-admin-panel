@@ -1,7 +1,7 @@
 <script setup>
 
 import {onMounted, ref} from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 import Donations from './Donations.vue'
 import Authentication from './Authentication.vue'
@@ -25,43 +25,35 @@ const incentives = ref({});
 
 const showEightCounters = ref(false);
 
-const getStreamMetaData = () => {
-  axios.get(`${url}/stream-metadata`)
-      .then((response) => {
-        streamMetaData.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
+const getStreamMetaData = async () => {
+  const response = await api.get('/stream-metadata');
+  if (response?.data) {
+    streamMetaData.value = response.data;
+  }
   setTimeout(getStreamMetaData, 3000);
 }
 
-const getDonations = () => {
-  axios.get(`${url}/donations`)
-      .then((response) => {
-        donations.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
+const getDonations = async () => {
+  const response = await api.get('/donations');
+  if (response?.data) {
+    donations.value = response.data;
+  }
   setTimeout(getDonations, 3000);
 }
 
-const getIncentives = () => {
-  axios.get(`${url}/incentives`)
-      .then((response) => {
-        incentives.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
+const getIncentives = async () => {
+  const response = await api.get('/incentives');
+  if (response?.data) {
+    incentives.value = response.data;
+  }
   setTimeout(getIncentives, 6000);
 }
 
-const getGames = () => {
-  axios.get(`${url}/gamedata`)
-      .then((response) => {
-        games.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
+const getGames = async () => {
+  const response = await api.get('/gamedata');
+  if (response?.data) {
+    games.value = response.data;
+  }
   setTimeout(getIncentives, 20000);
 }
 

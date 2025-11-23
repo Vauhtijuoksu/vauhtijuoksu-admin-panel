@@ -1,29 +1,12 @@
 <script setup>
-import {ref, toRefs, watch} from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
-const props = defineProps({
-  url: String
-})
-
-const { url } = toRefs(props);
-
-
-
-const set_donations_flag = (direction) => {
-
+const set_donations_flag = async () => {
   const timestamp = new Date();
-  axios.patch(`${url.value}/player-info`, {message: timestamp.toISOString() + " Lahjoituksia luettavana!"}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
-    .then((response) => {
-      console.log(response);
-    }).catch((err) => {
-      console.log(err);
-    })
+  const response = await api.patch('/player-info', {message: timestamp.toISOString() + " Lahjoituksia luettavana!"});
+  if (response) {
+    console.log(response);
+  }
 }
 </script>
 

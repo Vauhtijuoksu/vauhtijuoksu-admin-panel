@@ -1,13 +1,13 @@
 <script setup>
 import {ref, toRefs, watch} from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const props = defineProps({
   url: String,
   streamMetaData: Object
 })
 
-const { url, streamMetaData } = toRefs(props);
+const { streamMetaData } = toRefs(props);
 const info = ref('Loading...')
 
 let og_text = false
@@ -18,18 +18,11 @@ watch(streamMetaData, () => {
   }
 })
 
-const postStreamInfo = () => {
-  axios.patch(`${url.value}/stream-metadata`, {donatebar_info: info.value.split(/\r?\n/)}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
-    .then((response) => {
-      console.log(response);
-    }).catch((err) => {
-      console.log(err);
-    })
+const postStreamInfo = async () => {
+  const response = await api.patch('/stream-metadata', {donatebar_info: info.value.split(/\r?\n/)});
+  if (response) {
+    console.log(response);
+  }
 }
 </script>
 

@@ -1,35 +1,23 @@
 <script setup>
 
 import { ref } from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 import { useRoute, useRouter } from 'vue-router'
-
-const url = 'https://api.dev.vauhtijuoksu.fi';
 
 const donation = ref({})
 
 const route = useRoute()
 const router = useRouter()
 
-const getDonation = (id) => {
-  axios.get(`${url}/donations/${id}`)
-      .then((response) => {
-        donation.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
+const getDonation = async (id) => {
+  const response = await api.get(`/donations/${id}`);
+  if (response?.data) {
+    donation.value = response.data;
+  }
 }
 
 const patchDonation = async (id, donation) => {
-  return axios.patch(`${url}/donations/${id}`, { name: donation.name, message: donation.message }, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-    console.log(err);
-    alert("Something went wrong, refresh page and see damages")
-  });
+  return api.patch(`/donations/${id}`, { name: donation.name, message: donation.message });
 }
 
 const saveChanges = async () => {

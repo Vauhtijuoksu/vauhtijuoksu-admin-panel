@@ -1,6 +1,6 @@
 <script setup>
 import {ref, toRefs, watch} from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const props = defineProps({
   url: String,
@@ -8,7 +8,7 @@ const props = defineProps({
   player: Intl
 })
 
-const { url, streamMetaData, player } = toRefs(props);
+const { streamMetaData, player } = toRefs(props);
 
 
 let death = ref("-");
@@ -25,26 +25,20 @@ watch(streamMetaData, () => {
   }
 })
 
-const setCurrentDeaths = (direction) => {
+const setCurrentDeaths = async (direction) => {
 
   streamMetaData.value.counters[player.value - 1] = streamMetaData.value.counters[player.value - 1] + direction
 
-  axios.patch(`${url.value}/stream-metadata`, { counters: streamMetaData.value.counters }, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
+  const response = await api.patch('/stream-metadata', { counters: streamMetaData.value.counters });
+  
+  if (response) {
+    if (death.value === "OFF") {
+      death.value = 0;
+      document.getElementById(player.value - 1).classList.remove("death-off");
+    } else {
+      death.value = streamMetaData.value.counters[player.value - 1];
     }
-  })
-    .then((response) => {
-      if (death.value === "OFF") {
-        death.value = 0;
-        document.getElementById(player.value - 1).classList.remove("death-off");
-      } else {
-        death.value = streamMetaData.value.counters[player.value - 1];
-      }
-    }).catch((err) => {
-      console.log(err);
-    })
+  }
 }
 </script>
 

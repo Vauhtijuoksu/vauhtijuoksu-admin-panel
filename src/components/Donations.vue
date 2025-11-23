@@ -1,6 +1,6 @@
 <script setup>
 import {onMounted, ref, toRefs, watch} from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -12,7 +12,7 @@ const props = defineProps({
 
 const router = useRouter()
 
-const { url, games, donations, incentives } = toRefs(props);
+const { games, donations, incentives } = toRefs(props);
 
 
 const username = ref(localStorage.getItem('username'));
@@ -28,36 +28,22 @@ onMounted(()=> {
 
 
 
-const markDonation = (id, readValue) => {
-  axios.patch(`${url.value}/donations/${id}`, {read: readValue}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
-    .then(() => {
-      let obj = donations.value.find(x => x.id === id);
-      let index = donations.value.indexOf(obj);
-      donations.value.fill(obj.read=readValue, index, index++);
-    }).catch((err) => {
-      console.log(err);
-    });
+const markDonation = async (id, readValue) => {
+  const response = await api.patch(`/donations/${id}`, {read: readValue});
+  if (response) {
+    let obj = donations.value.find(x => x.id === id);
+    let index = donations.value.indexOf(obj);
+    donations.value.fill(obj.read=readValue, index, index++);
+  }
 }
 
-const censorName = (id, name) => {
+const censorName = async (id, name) => {
   let conf = confirm('Haluatko sensuroida käyttäjänimen ' + name + '?');
   if (conf){
-    axios.patch(`${url.value}/donations/${id}`, {name: 'höpö'}, {
-                auth: {
-                  username: localStorage.getItem('username'),
-                  password: localStorage.getItem('password')
-                }
-              })
-      .then((response) => {
-        console.log(response)
-      }).catch((err) => {
-        console.log(err);
-      });
+    const response = await api.patch(`/donations/${id}`, {name: 'höpö'});
+    if (response) {
+      console.log(response)
+    }
   }
 }
 

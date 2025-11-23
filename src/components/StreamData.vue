@@ -1,27 +1,20 @@
 <script setup>
 import { ref, toRefs } from 'vue'
-import axios from 'axios'
+import api from '@/utils/api'
 
 const props = defineProps({
   url: String,
   streamMetaData: Object
 })
 
-const { url, streamMetaData } = toRefs(props);
+const { streamMetaData } = toRefs(props);
 const info = ref('')
 
-const postStreamInfo = () => {
-  axios.post(`${url}/api/info`, {info: info.value}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
-    .then((response) => {
-      console.log(response);
-    }).catch((err) => {
-      console.log(err);
-    })
+const postStreamInfo = async () => {
+  const response = await api.post('/api/info', {info: info.value});
+  if (response) {
+    console.log(response);
+  }
 }
 </script>
 

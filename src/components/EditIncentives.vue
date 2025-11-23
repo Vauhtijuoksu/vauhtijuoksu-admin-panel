@@ -1,119 +1,52 @@
 <script setup>
 
-import { ref, watch } from 'vue'
-import axios from 'axios'
-import { DateTime } from 'luxon';
+import { ref, watch, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/utils/api'
+import { formatTimestamp, parseAndValidate, nowFormatted } from '@/utils/datetime'
+import { useCrud } from '@/composables/useCrud'
 
-const url = 'https://api.dev.vauhtijuoksu.fi';
+const router = useRouter()
+
+const {
+  items: incentives,
+  selectedItem: selectedIncentive,
+  changes,
+  mode,
+  getItems: getIncentives,
+  openEdit,
+  openAdd: openAddBase,
+  toggleDelete: remove,
+  removeAdded,
+  saveChanges: saveChangesBase,
+  changeView,
+  applyChanges,
+  isMarkedForDeletion,
+  isEdited,
+} = useCrud('/incentives', (incentive) => {
+  // Transform response: format timestamps
+  incentive.end_time = formatTimestamp(incentive.end_time)
+  return incentive;
+});
 
 const games = ref([]);
-const incentives = ref([]);
-const selectedIncentive = ref({})
-const changes = ref({
-  patch: {},
-  post: [],
-  delete: [],
-});
 
-const mode = ref("list");
-
-
-watch(selectedIncentive, (newValue) => {
-  if (newValue.type === 'open') {
-    console.log('sdf')
+const getGames = async () => {
+  const response = await api.get('/gamedata');
+  if (response?.data) {
+    games.value = response.data;
   }
-
-});
-
-const getIncentives = () => {
-  axios.get(`${url}/incentives`)
-      .then((response) => {
-        incentives.value = response.data;
-        incentives.value.map(incentive => {
-          incentive.end_time = new Date(incentive.end_time).toLocaleString("fi-FI")
-        })
-      }).catch((err) => {
-    console.log(err);
-  });
-}
-
-const getGames = () => {
-  axios.get(`${url}/gamedata`)
-      .then((response) => {
-        games.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
-}
-
-const postIncentive = async (incentive) => {
-  return axios.post(`${url}/incentives`, incentive, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-      console.log(err);
-      alert("Something went wrong, refresh page and see damages")
-    });
-}
-
-const deleteIncentive = async (id) => {
-  return axios.delete(`${url}/incentives/${id}`, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-      console.log(err);
-      alert("Something went wrong, refresh page and see damages")
-    });
-}
-
-const patchIncentive = async (id, incentive) => {
-  return axios.patch(`${url}/incentives/${id}`, incentive, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-    console.log(err);
-    alert("Something went wrong, refresh page and see damages")
-  });
-}
-
-const openEdit = (incentive) => {
-  if (incentive.id in changes.value.patch) {
-    selectedIncentive.value = changes.value.patch[incentive.id]
-    selectedIncentive.value.id = incentive.id
-  } else {
-    selectedIncentive.value = { ...incentive }
-  }
-  mode.value = "form"
-}
+};
 
 const openAdd = () => {
-  selectedIncentive.value = {
-    game_id: games.value[0].id,
-    title: "example title",
-    info: "example info",
-    end_time: new Date().toLocaleString("fi-FI"),
+  openAddBase({
+    game_id: games.value[0]?.id,
+    title: "Example Title",
+    info: "Example info text",
+    end_time: nowFormatted(),
     type: "open",
-  }
-  mode.value = "form"
-}
-
-const remove = (incentive) => {
-  if (changes.value.delete.includes(incentive.id)) {
-    changes.value.delete = changes.value.delete.filter(item => item !== incentive.id)
-  } else {
-    changes.value.delete.push(incentive.id)
-  }
-}
-
-const removeAdded = (incentive) => {
-  changes.value.post = changes.value.post.filter(item => item.title !== incentive.title)
-}
+  });
+};
 
 const addMilestone = (incentive) => {
   if (incentive.milestones?.length > 0) {
@@ -121,15 +54,15 @@ const addMilestone = (incentive) => {
   } else {
     incentive.milestones = [0]
   }
-}
+};
 
 const addOptionParameter = (incentive) => {
   if (incentive.option_parameters?.length > 0) {
-    incentive.option_parameters.push('foo')
+    incentive.option_parameters.push('New Option')
   } else {
-    incentive.option_parameters = ['foo']
+    incentive.option_parameters = ['New Option']
   }
-}
+};
 
 const saveChanges = () => {
   if ("id" in selectedIncentive.value) {
@@ -139,168 +72,424 @@ const saveChanges = () => {
       info: selectedIncentive.value.info,
       end_time: selectedIncentive.value.end_time,
     }
-
     selectedIncentive.value = {}
   } else {
     changes.value.post.push(selectedIncentive.value)
   }
   mode.value = "list"
-}
-
-const changeView = (view) => {
-  mode.value = view
-}
+};
 
 const changesToProd = async () => {
-  const conf = confirm('Do you want these changes to prod?');
-  if (conf) {
-
-    for (const key in changes.value.patch) {
-      const end_time_temp = changes.value.patch[key].end_time;
-      changes.value.patch[key].end_time = DateTime.fromFormat(end_time_temp.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      if (changes.value.patch[key].end_time == undefined) {
-        alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
-        throw Error("timestamps did not work out");
-      }
+  await applyChanges(async (patchData, postData) => {
+    // Transform timestamps before sending to API
+    for (const key in patchData) {
+      patchData[key].end_time = parseAndValidate(patchData[key].end_time);
     }
-    changes.value.post.map(incentive => {
-      incentive.end_time = DateTime.fromFormat(incentive.end_time.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      if (incentive.end_time == undefined) {
-        alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
-        throw Error("timestamps did not work out");
-      }
-    })
+    postData.forEach(incentive => {
+      incentive.end_time = parseAndValidate(incentive.end_time);
+    });
+  });
+  await getGames();
+};
 
-    for (const key in changes.value.patch) {
-      await patchIncentive(key, changes.value.patch[key])
-    }
+const hasChanges = computed(() => {
+  return Object.keys(changes.value.patch).length > 0 || 
+         changes.value.post.length > 0 || 
+         changes.value.delete.length > 0;
+});
 
-    const posts = changes.value.post.map(incentive => postIncentive(incentive))
-    const deletes = changes.value.delete.map(id => deleteIncentive(id))
+const changeCount = computed(() => {
+  return Object.keys(changes.value.patch).length + 
+         changes.value.post.length + 
+         changes.value.delete.length;
+});
 
-    await Promise.all([...posts, ...deletes]);
+const getGameName = (gameId) => {
+  return games.value.find(g => g.id === gameId)?.game || 'Unknown Game';
+};
 
-    changes.value = {
-      patch: {},
-      post: [],
-      delete: [],
-    }
-    getIncentives()
-    getGames()
-    changeView('list')
-  }
-}
-
-
-getIncentives();
-getGames();
+onMounted(() => {
+  getIncentives();
+  getGames();
+});
 </script>
 
 <template>
-  <div v-if="mode === 'list'">
-    <tr v-for="incentive in incentives" :key="incentive.id">
-          {{ incentive.title }} - 
-          {{ incentive.end_time }}
-          <span @click="openEdit(incentive)" title="editoi">🔧</span>
-          <span @click="remove(incentive)" title="poista">❌</span>
-          <template v-if="incentive.id in changes.patch">
-            - edited
-          </template>
-          <template v-if="changes.delete.includes(incentive.id)">
-            - deleted
-          </template>
-    </tr>
+  <div class="edit-container">
+    <!-- LIST VIEW -->
+    <div v-if="mode === 'list'" class="list-view">
+      <div class="header">
+        <div>
+          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
+        </div>
+        <h2>Incentives Management</h2>
+        <div class="header-actions">
+          <button @click="openAdd()" class="btn btn-success">
+            <span class="icon">➕</span> Add New Incentive
+          </button>
+          <button 
+            v-if="hasChanges" 
+            @click="changeView('preview')" 
+            class="btn btn-warning"
+          >
+            <span class="icon">👁️</span> Preview Changes ({{ changeCount }})
+          </button>
+        </div>
+      </div>
 
-    <span @click="openAdd()" title="lisää uusi">🆕</span>  
+      <div class="items-grid">
+        <div 
+          v-for="incentive in incentives" 
+          :key="incentive.id" 
+          class="item-card"
+          :class="{ 'item-edited': isEdited(incentive), 'item-deleted': isMarkedForDeletion(incentive) }"
+        >
+          <div class="item-header">
+            <h3>{{ incentive.title }}</h3>
+            <div class="item-badges">
+              <span v-if="isEdited(incentive)" class="badge badge-warning">Edited</span>
+              <span v-if="isMarkedForDeletion(incentive)" class="badge badge-danger">Deleted</span>
+              <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
+            </div>
+          </div>
+          <div class="item-details">
+            <div class="detail-row" v-if="incentive.game_id">
+              <span class="label">Game:</span>
+              <span class="value">{{ getGameName(incentive.game_id) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Ends:</span>
+              <span class="value">{{ incentive.end_time }}</span>
+            </div>
+            <div class="detail-row" v-if="incentive.info">
+              <span class="label">Info:</span>
+              <span class="value">{{ incentive.info }}</span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button @click="openEdit(incentive)" class="btn btn-sm btn-primary">
+              🔧 Edit
+            </button>
+            <button 
+              @click="remove(incentive)" 
+              :class="isMarkedForDeletion(incentive) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
+            >
+              {{ isMarkedForDeletion(incentive) ? '↩️ Undo' : '❌ Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
 
-    <tr v-for="incentive in changes.post" :key="incentive.title">
-          {{ incentive.title }} - 
-          {{ incentive.end_time }}
-          <span @click="removeAdded(incentive)" title="poista lisättävä">❌</span>
-    </tr>
-    <div>
-      <button @click="changeView('preview')" class="btn btn-primary">Preview changes</button>
+      <div v-if="changes.post.length > 0" class="pending-section">
+        <h3>Pending New Incentives</h3>
+        <div class="items-grid">
+          <div v-for="incentive in changes.post" :key="incentive.title" class="item-card item-new">
+            <div class="item-header">
+              <h3>{{ incentive.title }}</h3>
+              <div class="item-badges">
+                <span class="badge badge-success">New</span>
+                <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
+              </div>
+            </div>
+            <div class="item-details">
+              <div class="detail-row">
+                <span class="label">Ends:</span>
+                <span class="value">{{ incentive.end_time }}</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button @click="removeAdded(incentive)" class="btn btn-sm btn-danger">
+                ❌ Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div v-else-if="mode === 'form'">
-    <form>
-      <div class="mb-3">
-          <div v-if="'game_id' in selectedIncentive" class="mb-3">
-            <label for="game" class="form-label">Game</label>
-            <select class="form-select" v-model="selectedIncentive.game_id">
-              <option v-for="game in games" :key="game.id" :value="game.id">
-                {{ game.game }}
-              </option>
-            </select>
-            <span @click="delete selectedIncentive.game_id" title="poista game_id">❌</span>
+    <!-- FORM VIEW -->
+    <div v-else-if="mode === 'form'" class="form-view">
+      <div class="form-header header-with-back">
+        <button @click="changeView('list')" class="btn btn-back">
+          ← Back
+        </button>
+        <h2>{{ selectedIncentive.id ? 'Edit Incentive' : 'Add New Incentive' }}</h2>
+        <div></div>
+      </div>
+      
+      <form class="edit-form">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          
+          <div class="form-row" v-if="'game_id' in selectedIncentive || !selectedIncentive.id">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label for="game" class="form-label">Associated Game</label>
+              <div class="game-selector">
+                <select 
+                  v-if="'game_id' in selectedIncentive" 
+                  class="form-select" 
+                  v-model="selectedIncentive.game_id"
+                >
+                  <option v-for="game in games" :key="game.id" :value="game.id">
+                    {{ game.game }}
+                  </option>
+                </select>
+                <button 
+                  v-if="'game_id' in selectedIncentive"
+                  type="button"
+                  @click="delete selectedIncentive.game_id" 
+                  class="btn btn-sm btn-danger"
+                >
+                  ❌ Remove Game Link
+                </button>
+                <button 
+                  v-if="!('game_id' in selectedIncentive)"
+                  type="button"
+                  @click="selectedIncentive.game_id = games[0]?.id" 
+                  class="btn btn-sm btn-success"
+                >
+                  ➕ Link to Game
+                </button>
+              </div>
+            </div>
           </div>
-            <span @click="selectedIncentive.game_id = games[0].id" title="lisää game_id">🆕</span>
-      </div>
-      <div class="mb-3">
-          <label for="title" class="form-label">Title</label>
-          <input type="text" class="form-control" id="title" name="title" v-model='selectedIncentive.title'>
-      </div>
-      <div class="mb-3">
-          <label for="info" class="form-label">Info</label>
-          <input type="text" class="form-control" id="info" name="info" v-model='selectedIncentive.info'>
-      </div>
-      <div class="mb-3">
-          <label for="end_time" class="form-label">End Time</label>
-          <input type="text" class="form-control" id="end_time" name="end_time" v-model='selectedIncentive.end_time'>
-      </div>
-      <div v-if="selectedIncentive.id === undefined">
-        <label for="type" class="form-label">Type</label>
-        <div class="mb-3">
-          <select id="type" name="type" class="form-select" v-model="selectedIncentive.type">
-            <option value="milestone">milestone</option>
-            <option value="option">option</option>
-            <option value="open">open</option>
-          </select>
-        </div>
-        <div v-if="selectedIncentive.type === 'open'" class="mb-3">
-          <label for="open_char_limit" class="form-label">Open Char Limit</label>
-          <input type="number" class="form-control" id="open_char_limit" name="open_char_limit" v-model='selectedIncentive.open_char_limit'>
-        </div>
-        <div v-if="selectedIncentive.type === 'milestone'" class="mb-3">
-          <label for="milestones" class="form-label">Milestones</label>
-          <div v-for="(_, index) in selectedIncentive.milestones">
-            <input
-              type="number" class="form-control" id="milestone"
-              name="milestone" v-model='selectedIncentive.milestones[index]'
-            >
-            <span @click="selectedIncentive.milestones.splice(index, 1)" title="poista milestone">❌</span>
-          </div>
-          <span @click="addMilestone(selectedIncentive)" title="lisää uusi milestone">🆕</span>
-        </div>
-        <div v-if="selectedIncentive.type === 'option'" class="mb-3">
-          <label for="option_parameters" class="form-label">Option Parameters</label>
-          <div v-for="(_, index) in selectedIncentive.option_parameters">
-            <input
-              type="text" class="form-control" id="option_parameter"
-              name="option_parameter" v-model='selectedIncentive.option_parameters[index]'
-            >
-            <span @click="selectedIncentive.option_parameters.splice(index, 1)" title="poista option parameter">❌</span>
-          </div>
-          <span @click="addOptionParameter(selectedIncentive)" title="lisää uusi option parameter">🆕</span>
-        </div>
-      </div>
-      <button @click.prevent="saveChanges()" class="btn btn-primary">Submit</button>
-      <button @click="changeView('list')" class="btn btn-primary">Discard</button>
-    </form>
-  </div>
 
-  <div v-else-if="mode === 'preview'">
-    <h3>PATCH</h3>
-    <pre>{{ JSON.stringify(changes.patch, null, 2) }}</pre>
-    <h3>POST</h3>
-    <pre>{{ JSON.stringify(changes.post, null, 2) }}</pre>
-    <h3>DELETE</h3>
-    <pre>{{ JSON.stringify(changes.delete, null, 2) }}</pre>
-    <button @click="changeView('list')" class="btn btn-primary">Back to list</button>
-    <button @click="changesToProd()" class="btn btn-danger">Make changes to prod</button>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="title" class="form-label">Title *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="title" 
+                v-model='selectedIncentive.title'
+                placeholder="Enter incentive title"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="info" class="form-label">Info/Description</label>
+              <textarea 
+                class="form-control" 
+                id="info" 
+                v-model='selectedIncentive.info'
+                rows="3"
+                placeholder="Additional information about this incentive"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="end_time" class="form-label">End Time *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="end_time" 
+                v-model='selectedIncentive.end_time'
+                placeholder="d.M.yyyy HH:mm:ss"
+              >
+              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- TYPE SPECIFIC FIELDS (only for new incentives) -->
+        <div v-if="selectedIncentive.id === undefined" class="form-section">
+          <h3>Incentive Type Configuration</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="type" class="form-label">Type *</label>
+              <select id="type" class="form-select" v-model="selectedIncentive.type">
+                <option value="open">Open (Free text)</option>
+                <option value="milestone">Milestone (Goals)</option>
+                <option value="option">Option (Multiple choice)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- OPEN TYPE -->
+          <div v-if="selectedIncentive.type === 'open'" class="type-config">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="open_char_limit" class="form-label">Character Limit</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="open_char_limit" 
+                  v-model='selectedIncentive.open_char_limit'
+                  placeholder="e.g., 100"
+                >
+                <small class="form-text">Maximum number of characters allowed</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- MILESTONE TYPE -->
+          <div v-if="selectedIncentive.type === 'milestone'" class="type-config">
+            <label class="form-label">Milestone Amounts (€)</label>
+            <div class="milestone-list">
+              <div 
+                v-for="(milestone, index) in selectedIncentive.milestones" 
+                :key="index"
+                class="milestone-item"
+              >
+                <input
+                  type="number" 
+                  class="form-control" 
+                  v-model='selectedIncentive.milestones[index]'
+                  placeholder="Amount in €"
+                  step="0.01"
+                >
+                <button 
+                  type="button"
+                  @click="selectedIncentive.milestones.splice(index, 1)" 
+                  class="btn btn-sm btn-danger"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+            <button 
+              type="button"
+              @click="addMilestone(selectedIncentive)" 
+              class="btn btn-sm btn-secondary"
+            >
+              ➕ Add Milestone
+            </button>
+          </div>
+
+          <!-- OPTION TYPE -->
+          <div v-if="selectedIncentive.type === 'option'" class="type-config">
+            <label class="form-label">Options</label>
+            <div class="option-list">
+              <div 
+                v-for="(option, index) in selectedIncentive.option_parameters" 
+                :key="index"
+                class="option-item"
+              >
+                <input
+                  type="text" 
+                  class="form-control" 
+                  v-model='selectedIncentive.option_parameters[index]'
+                  placeholder="Option text"
+                >
+                <button 
+                  type="button"
+                  @click="selectedIncentive.option_parameters.splice(index, 1)" 
+                  class="btn btn-sm btn-danger"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+            <button 
+              type="button"
+              @click="addOptionParameter(selectedIncentive)" 
+              class="btn btn-sm btn-secondary"
+            >
+              ➕ Add Option
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button @click.prevent="saveChanges()" class="btn btn-success">
+            ✅ Save Changes
+          </button>
+          <button type="button" @click="changeView('list')" class="btn btn-secondary">
+            ❌ Discard
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- PREVIEW VIEW -->
+    <div v-else-if="mode === 'preview'" class="preview-view">
+      <div class="preview-header">
+        <h2>Preview Changes</h2>
+        <p class="text-muted">Review your changes before applying them to production</p>
+      </div>
+
+      <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
+        <h3>🔧 Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-section" v-if="changes.post.length > 0">
+        <h3>➕ New Items ({{ changes.post.length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-section" v-if="changes.delete.length > 0">
+        <h3>❌ Deletions ({{ changes.delete.length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-actions">
+        <button @click="changeView('list')" class="btn btn-secondary">
+          ← Back to List
+        </button>
+        <button @click="changesToProd()" class="btn btn-danger">
+          🚀 Apply to Production
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
-<style>
+<style scoped>
+@import '@/css/edit-styles.css';
+
+.game-selector {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.game-selector .form-select {
+  flex: 1;
+}
+
+.type-config {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 2px dashed #ddd;
+}
+
+.milestone-list,
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+  margin-top: 10px;
+}
+
+.milestone-item,
+.option-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.milestone-item .form-control,
+.option-item .form-control {
+  flex: 1;
+}
+
+.badge-info {
+  background: #17a2b8;
+  color: white;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
 </style>

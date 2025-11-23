@@ -1,275 +1,387 @@
 <script setup>
 
-import { ref } from 'vue'
-import axios from 'axios'
-import { DateTime } from 'luxon';
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/utils/api'
+import { formatTimestamp, parseAndValidate, nowFormatted } from '@/utils/datetime'
+import { useCrud } from '@/composables/useCrud'
 
-const url = 'https://api.dev.vauhtijuoksu.fi';
+const router = useRouter()
 
-const games = ref([]);
-const participants = ref([]);
-const selectedGame = ref({})
-const changes = ref({
-  patch: {},
-  post: [],
-  delete: [],
+const {
+  items: games,
+  selectedItem: selectedGame,
+  changes,
+  mode,
+  getItems: getGames,
+  openEdit,
+  openAdd: openAddBase,
+  toggleDelete: remove,
+  removeAdded,
+  saveChanges,
+  changeView,
+  applyChanges,
+  isMarkedForDeletion,
+  isEdited,
+} = useCrud('/gamedata', (game) => {
+  // Transform response: format timestamps
+  game.start_time = formatTimestamp(game.start_time)
+  game.end_time = formatTimestamp(game.end_time)
+  delete game.players;
+  return game;
 });
 
-const mode = ref("list");
+const participants = ref([]);
 
-const getGames = () => {
-  axios.get(`${url}/gamedata`)
-      .then((response) => {
-        games.value = response.data;
-        games.value.map(game => {
-          game.start_time = new Date(game.start_time).toLocaleString("fi-FI")
-          game.end_time = new Date(game.end_time).toLocaleString("fi-FI")
-          delete game.players;
-        })
-      }).catch((err) => {
-    console.log(err);
-  });
-}
-
-const postGame = async (game) => {
-  return axios.post(`${url}/gamedata`, game, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-      console.log(err);
-      alert("Something went wrong, refresh page and see damages")
-    });
-}
-
-const deleteGame = async (id) => {
-  return axios.delete(`${url}/gamedata/${id}`, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-      console.log(err);
-      alert("Something went wrong, refresh page and see damages")
-    });
-}
-
-const patchGame = async (id, game) => {
-  return axios.patch(`${url}/gamedata/${id}`, game, {
-    auth: {
-      username: localStorage.getItem('username'),
-      password: localStorage.getItem('password')
-    }
-  }).catch((err) => {
-    console.log(err);
-    alert("Something went wrong, refresh page and see damages")
-  });
-}
-
-const getParticipants = () => {
-  axios.get(`${url}/participants`)
-      .then((response) => {
-        participants.value = response.data;
-      }).catch((err) => {
-    console.log(err);
-  });
-}
-
-const openEdit = (game) => {
-  if (game.id in changes.value.patch) {
-    selectedGame.value = changes.value.patch[game.id]
-    selectedGame.value.id = game.id
-  } else {
-    selectedGame.value = { ...game }
+const getParticipants = async () => {
+  const response = await api.get('/participants');
+  if (response?.data) {
+    participants.value = response.data;
   }
-  mode.value = "form"
-}
+};
 
 const openAdd = () => {
-  selectedGame.value = {
+  openAddBase({
     game: "Example Game Name",
-    start_time: new Date().toLocaleString("fi-FI"),
-    end_time: new Date().toLocaleString("fi-FI"),
+    start_time: nowFormatted(),
+    end_time: nowFormatted(),
     category: "example%",
     device: "PC (for example)",
     published: "2022 (for example)",
     img_filename: "example.png",
     meta: "8676 (twitch game id for example)",
     participants: [],
-  }
-  mode.value = "form"
-}
-
-const remove = (game) => {
-  if (changes.value.delete.includes(game.id)) {
-    changes.value.delete = changes.value.delete.filter(item => item !== game.id)
-  } else {
-    changes.value.delete.push(game.id)
-  }
-}
-
-const removeAdded = (game) => {
-  changes.value.post = changes.value.post.filter(item => item.game !== game.game)
-}
-
-
-const saveChanges = () => {
-  if ("id" in selectedGame.value) {
-    changes.value.patch[selectedGame.value.id] = selectedGame.value
-    changes.value.patch[selectedGame.value.id].id = undefined
-
-    selectedGame.value = {}
-  } else {
-    changes.value.post.push(selectedGame.value)
-  }
-  mode.value = "list"
-}
-
-const changeView = (view) => {
-  mode.value = view
-}
+  });
+};
 
 const changesToProd = async () => {
-  const conf = confirm('Do you want these changes to prod?');
-  if (conf){
-
-    for (const key in changes.value.patch) {
-      const start_time_temp = changes.value.patch[key].start_time;
-      const end_time_temp = changes.value.patch[key].end_time;
-      changes.value.patch[key].start_time = DateTime.fromFormat(start_time_temp.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      changes.value.patch[key].end_time = DateTime.fromFormat(end_time_temp.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      if (changes.value.patch[key].end_time == undefined || changes.value.patch[key].start_time == undefined) {
-        alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
-        throw Error("timestamps did not work out");
-      }
+  await applyChanges(async (patchData, postData) => {
+    // Transform timestamps before sending to API
+    for (const key in patchData) {
+      patchData[key].start_time = parseAndValidate(patchData[key].start_time);
+      patchData[key].end_time = parseAndValidate(patchData[key].end_time);
     }
-    changes.value.post.map(game => {
-      game.start_time = DateTime.fromFormat(game.start_time.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      game.end_time = DateTime.fromFormat(game.end_time.replace(' klo', ''), "d.M.yyyy HH.mm.ss", { locale: "fi" }).toISO();
-      if (game.end_time == undefined || game.start_time == undefined) {
-        alert("Timestamps where invalid, refresh page and try again, no changes where made to prod")
-        throw Error("timestamps did not work out");
-      }
-    })
+    postData.forEach(game => {
+      game.start_time = parseAndValidate(game.start_time);
+      game.end_time = parseAndValidate(game.end_time);
+    });
+  });
+  await getParticipants();
+};
 
-    for (const key in changes.value.patch) {
-      await patchGame(key, changes.value.patch[key])
-    }
+const hasChanges = computed(() => {
+  return Object.keys(changes.value.patch).length > 0 || 
+         changes.value.post.length > 0 || 
+         changes.value.delete.length > 0;
+});
 
-    const posts = changes.value.post.map(game => postGame(game))
-    const deletes = changes.value.delete.map(id => deleteGame(id))
+const changeCount = computed(() => {
+  return Object.keys(changes.value.patch).length + 
+         changes.value.post.length + 
+         changes.value.delete.length;
+});
 
-    await Promise.all([...posts, ...deletes]);
-
-    changes.value = {
-      patch: {},
-      post: [],
-      delete: [],
-    }
-    getParticipants()
-    getGames()
-    changeView('list')
-  }
-}
-
-
-getGames();
-getParticipants();
+onMounted(() => {
+  getGames();
+  getParticipants();
+});
 </script>
 
 <template>
-  <div v-if="mode === 'list'">
-    <tr v-for="game in games" :key="game.id">
-          {{ game.game }}
-          {{ game.start_time }} -
-          {{ game.end_time }}
-          <span @click="openEdit(game)" title="editoi">🔧</span>
-          <span @click="remove(game)" title="poista">❌</span>
-          <template v-if="game.id in changes.patch">
-            - edited
-          </template>
-          <template v-if="changes.delete.includes(game.id)">
-            - deleted
-          </template>
-    </tr>
-
-    <span @click="openAdd()" title="lisää uusi">🆕</span>  
-
-    <tr v-for="game in changes.post" :key="game.game">
-          {{ game.game }}
-          {{ game.start_time }} -
-          {{ game.end_time }}
-          <span @click="removeAdded(game)" title="poista lisättävä">❌</span>
-    </tr>
-    <div>
-      <button @click="changeView('preview')" class="btn btn-primary">Preview changes</button>
-    </div>
-  </div>
-
-  <div v-else-if="mode === 'form'">
-    <form>
-      <div class="mb-3">
-          <label for="game" class="form-label">Game</label>
-          <input type="text" class="form-control" id="game" name="game" v-model='selectedGame.game'>
-      </div>
-      <div class="mb-3">
-          <label for="start_time" class="form-label">Start Time</label>
-          <input type="text" class="form-control" id="start_time" name="start_time" v-model='selectedGame.start_time'>
-      </div>
-      <div class="mb-3">
-          <label for="end_time" class="form-label">End Time</label>
-          <input type="text" class="form-control" id="end_time" name="end_time" v-model='selectedGame.end_time'>
-      </div>
-      <div class="mb-3">
-          <label for="category" class="form-label">Category</label>
-          <input type="text" class="form-control" id="category" name="category" v-model='selectedGame.category'>
-      </div>
-      <div class="mb-3">
-          <label for="device" class="form-label">Device</label>
-          <input type="text" class="form-control" id="device" name="device" v-model='selectedGame.device'>
-      </div>
-      <div class="mb-3">
-          <label for="published" class="form-label">Published</label>
-          <input type="text" class="form-control" id="published" name="published" v-model='selectedGame.published'>
-      </div>
-      <div class="mb-3">
-          <label for="img_filename" class="form-label">Img Filename</label>
-          <input type="text" class="form-control" id="img_filename" name="img_filename" v-model='selectedGame.img_filename'>
-      </div>
-      <div class="mb-3">
-          <label for="meta" class="form-label">Meta</label>
-          <input type="text" class="form-control" id="meta" name="meta" v-model='selectedGame.meta'>
-      </div>
-      <div class="mb-3">
-        <label for="participants" class="form-label">Participants</label>
-        <div v-for="(participant, index) in selectedGame.participants" :key="index">
-          <select class="form-select" v-model="participant.participant_id">
-            <option v-for="p in participants" :key="p.id" :value="p.id">
-              {{ p.display_name }}
-            </option>
-          </select>
-          <input type="text" class="form-control" v-model="participant.role" placeholder="Role (e.g., PLAYER, COMMENTATOR, HOST)">
-          <span @click="selectedGame.participants.splice(index, 1)" title="poista osallistuja">❌</span>
+  <div class="edit-container">
+    <!-- LIST VIEW -->
+    <div v-if="mode === 'list'" class="list-view">
+      <div class="header">
+        <div>
+          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
         </div>
-        <span @click="selectedGame.participants.push({ participant_id: participants[0]?.id, role: 'PLAYER' })" title="lisää uusi osallistuja">🆕</span>
+        <h2>Game Data Management</h2>
+        <div class="header-actions">
+          <button @click="openAdd()" class="btn btn-success">
+            <span class="icon">➕</span> Add New Game
+          </button>
+          <button 
+            v-if="hasChanges" 
+            @click="changeView('preview')" 
+            class="btn btn-warning"
+          >
+            <span class="icon">👁️</span> Preview Changes ({{ changeCount }})
+          </button>
+        </div>
       </div>
-      <button @click.prevent="saveChanges()" class="btn btn-primary">Submit</button>
-      <button @click="changeView('list')" class="btn btn-primary">Discard</button>
-    </form>
-  </div>
 
-  <div v-else-if="mode === 'preview'">
-    <h3>PATCH</h3>
-    <pre>{{ JSON.stringify(changes.patch, null, 2) }}</pre>
-    <h3>POST</h3>
-    <pre>{{ JSON.stringify(changes.post, null, 2) }}</pre>
-    <h3>DELETE</h3>
-    <pre>{{ JSON.stringify(changes.delete, null, 2) }}</pre>
-    <button @click="changeView('list')" class="btn btn-primary">Back to list</button>
-    <button @click="changesToProd()" class="btn btn-danger">Make changes to prod</button>
+      <div class="items-grid">
+        <div 
+          v-for="game in games" 
+          :key="game.id" 
+          class="item-card"
+          :class="{ 'item-edited': isEdited(game), 'item-deleted': isMarkedForDeletion(game) }"
+        >
+          <div class="item-header">
+            <h3>{{ game.game }}</h3>
+            <div class="item-badges">
+              <span v-if="isEdited(game)" class="badge badge-warning">Edited</span>
+              <span v-if="isMarkedForDeletion(game)" class="badge badge-danger">Deleted</span>
+            </div>
+          </div>
+          <div class="item-details">
+            <div class="detail-row">
+              <span class="label">Time:</span>
+              <span class="value">{{ game.start_time }} - {{ game.end_time }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">Category:</span>
+              <span class="value">{{ game.category }}</span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button @click="openEdit(game)" class="btn btn-sm btn-primary" title="Edit">
+              🔧 Edit
+            </button>
+            <button 
+              @click="remove(game)" 
+              :class="isMarkedForDeletion(game) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
+              title="Delete"
+            >
+              {{ isMarkedForDeletion(game) ? '↩️ Undo' : '❌ Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="changes.post.length > 0" class="pending-section">
+        <h3>Pending New Games</h3>
+        <div class="items-grid">
+          <div v-for="game in changes.post" :key="game.game" class="item-card item-new">
+            <div class="item-header">
+              <h3>{{ game.game }}</h3>
+              <span class="badge badge-success">New</span>
+            </div>
+            <div class="item-details">
+              <div class="detail-row">
+                <span class="label">Time:</span>
+                <span class="value">{{ game.start_time }} - {{ game.end_time }}</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button @click="removeAdded(game)" class="btn btn-sm btn-danger">
+                ❌ Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM VIEW -->
+    <div v-else-if="mode === 'form'" class="form-view">
+      <div class="form-header header-with-back">
+        <button @click="changeView('list')" class="btn btn-back">
+          ← Back
+        </button>
+        <h2>{{ selectedGame.id ? 'Edit Game' : 'Add New Game' }}</h2>
+        <div></div>
+      </div>
+      
+      <form class="edit-form">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="game" class="form-label">Game Name *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="game" 
+                v-model='selectedGame.game'
+                placeholder="Enter game name"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="start_time" class="form-label">Start Time *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="start_time" 
+                v-model='selectedGame.start_time'
+                placeholder="d.M.yyyy HH:mm:ss"
+              >
+              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+            </div>
+            <div class="form-group">
+              <label for="end_time" class="form-label">End Time *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="end_time" 
+                v-model='selectedGame.end_time'
+                placeholder="d.M.yyyy HH:mm:ss"
+              >
+              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Game Details</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category" class="form-label">Category</label>
+              <input type="text" class="form-control" id="category" v-model='selectedGame.category'>
+            </div>
+            <div class="form-group">
+              <label for="device" class="form-label">Device</label>
+              <input type="text" class="form-control" id="device" v-model='selectedGame.device'>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="published" class="form-label">Published</label>
+              <input type="text" class="form-control" id="published" v-model='selectedGame.published'>
+            </div>
+            <div class="form-group">
+              <label for="img_filename" class="form-label">Image Filename</label>
+              <input type="text" class="form-control" id="img_filename" v-model='selectedGame.img_filename'>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="meta" class="form-label">Meta (Twitch Game ID)</label>
+              <input type="text" class="form-control" id="meta" v-model='selectedGame.meta'>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Participants</h3>
+          <div class="participants-list">
+            <div 
+              v-for="(participant, index) in selectedGame.participants" 
+              :key="index"
+              class="participant-row"
+            >
+              <div class="participant-select">
+                <label>Player</label>
+                <select class="form-select" v-model="participant.participant_id">
+                  <option v-for="p in participants" :key="p.id" :value="p.id">
+                    {{ p.display_name }}
+                  </option>
+                </select>
+              </div>
+              <div class="participant-role">
+                <label>Role</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="participant.role" 
+                  placeholder="PLAYER, COMMENTATOR, HOST..."
+                >
+              </div>
+              <button 
+                type="button"
+                @click="selectedGame.participants.splice(index, 1)" 
+                class="btn btn-sm btn-danger"
+                title="Remove participant"
+              >
+                ❌
+              </button>
+            </div>
+          </div>
+          <button 
+            type="button"
+            @click="selectedGame.participants.push({ participant_id: participants[0]?.id, role: 'PLAYER' })" 
+            class="btn btn-sm btn-secondary"
+          >
+            ➕ Add Participant
+          </button>
+        </div>
+
+        <div class="form-actions">
+          <button @click.prevent="saveChanges()" class="btn btn-success">
+            ✅ Save Changes
+          </button>
+          <button @click="changeView('list')" class="btn btn-secondary">
+            ❌ Discard
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- PREVIEW VIEW -->
+    <div v-else-if="mode === 'preview'" class="preview-view">
+      <div class="preview-header">
+        <h2>Preview Changes</h2>
+        <p class="text-muted">Review your changes before applying them to production</p>
+      </div>
+
+      <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
+        <h3>🔧 Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-section" v-if="changes.post.length > 0">
+        <h3>➕ New Items ({{ changes.post.length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-section" v-if="changes.delete.length > 0">
+        <h3>❌ Deletions ({{ changes.delete.length }})</h3>
+        <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
+      </div>
+
+      <div class="preview-actions">
+        <button @click="changeView('list')" class="btn btn-secondary">
+          ← Back to List
+        </button>
+        <button @click="changesToProd()" class="btn btn-danger">
+          🚀 Apply to Production
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
-<style>
+<style scoped>
+@import '@/css/edit-styles.css';
+
+/* Component-specific styles */
+.participants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.participant-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.participant-select, .participant-role {
+  display: flex;
+  flex-direction: column;
+}
+
+.participant-select label, .participant-role label {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+  .participant-row {
+    grid-template-columns: 1fr;
+  }
+}
 </style>

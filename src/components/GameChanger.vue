@@ -2,14 +2,15 @@
 import { watch, ref, toRefs } from 'vue'
 import axios from 'axios'
 import TwitchJs from 'twitch-js'
+import api from '@/utils/api'
 
 const clientId = localStorage.getItem('twitch_client_id')
 const token = localStorage.getItem('twitch_access_token')
 
-let api;
+let twitchApi;
 
 if (clientId && token){
-  api = new TwitchJs({ token, clientId }).api
+  twitchApi = new TwitchJs({ token, clientId }).api
 }
 
 const props = defineProps({
@@ -19,7 +20,7 @@ const props = defineProps({
   streamMetaData: Object
 })
 
-const { games, url, streamMetaData } = toRefs(props);
+const { games, streamMetaData } = toRefs(props);
 
 let game = ref("Loading...");
 watch(streamMetaData, () => {
@@ -31,7 +32,7 @@ watch(streamMetaData, () => {
 const setCurrentGameTwitch = async (gameTwitchId) => {
   try {
     if (localStorage.getItem('twitch_user') === null) {
-      const userData = await api.get('users')
+      const userData = await twitchApi.get('users')
       localStorage.setItem('twitch_user', userData.data[0].id)
     }
     const gameId = gameTwitchId;
@@ -54,26 +55,16 @@ const setCurrentGameTwitch = async (gameTwitchId) => {
   }
 }
 
-const setCurrentGame = (direction) => {
+const setCurrentGame = async (direction) => {
 
   const gameIndex = games.value.findIndex(x => x === game.value)
   game.value = games.value[gameIndex + direction]
   
-  axios.patch(`${url.value}/stream-metadata`, {current_game_id: game.value.id}, {
-              auth: {
-                username: localStorage.getItem('username'),
-                password: localStorage.getItem('password')
-              }
-            })
-    .then(() => {
-      if (games.value.length){
-        if (clientId && token){
-          setCurrentGameTwitch(game.value.meta);
-        }
-      }
-    }).catch((err) => {
-      console.log(err);
-    })
+  const response = await api.patch('/stream-metadata', {current_game_id: game.value.id});
+  
+  if (response && games.value.length && clientId && token) {
+    setCurrentGameTwitch(game.value.meta);
+  }
 }
 </script>
 
