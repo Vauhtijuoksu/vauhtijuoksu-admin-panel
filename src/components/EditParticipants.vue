@@ -113,14 +113,14 @@ onMounted(() => {
         <h2>Participants Management</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            <span class="icon">➕</span> Add New Participant
+            Add New Participant
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            <span class="icon">👁️</span> Preview Changes ({{ changeCount }})
+            Preview Changes ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -142,12 +142,10 @@ onMounted(() => {
           <div class="item-details">
             <div class="social-links">
               <div class="social-item" v-if="getTwitchHandle(participant) !== '-'">
-                <span class="social-icon">📺</span>
                 <span class="social-label">Twitch:</span>
                 <span class="social-value">{{ getTwitchHandle(participant) }}</span>
               </div>
               <div class="social-item" v-if="getDiscordHandle(participant) !== '-'">
-                <span class="social-icon">💬</span>
                 <span class="social-label">Discord:</span>
                 <span class="social-value">{{ getDiscordHandle(participant) }}</span>
               </div>
@@ -158,13 +156,13 @@ onMounted(() => {
           </div>
           <div class="item-actions">
             <button @click="openEdit(participant)" class="btn btn-sm btn-primary">
-              🔧 Edit
+              Edit
             </button>
             <button 
               @click="remove(participant)" 
               :class="isMarkedForDeletion(participant) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(participant) ? '↩️ Undo' : '❌ Delete' }}
+              {{ isMarkedForDeletion(participant) ? 'Undo' : 'Delete' }}
             </button>
           </div>
         </div>
@@ -181,12 +179,10 @@ onMounted(() => {
             <div class="item-details">
               <div class="social-links">
                 <div class="social-item" v-if="getTwitchHandle(participant) !== '-'">
-                  <span class="social-icon">📺</span>
                   <span class="social-label">Twitch:</span>
                   <span class="social-value">{{ getTwitchHandle(participant) }}</span>
                 </div>
                 <div class="social-item" v-if="getDiscordHandle(participant) !== '-'">
-                  <span class="social-icon">💬</span>
                   <span class="social-label">Discord:</span>
                   <span class="social-value">{{ getDiscordHandle(participant) }}</span>
                 </div>
@@ -194,7 +190,7 @@ onMounted(() => {
             </div>
             <div class="item-actions">
               <button @click="removeAdded(participant)" class="btn btn-sm btn-danger">
-                ❌ Remove
+                Remove
               </button>
             </div>
           </div>
@@ -226,7 +222,6 @@ onMounted(() => {
                 placeholder="Enter participant's display name"
                 required
               >
-              <small class="form-text">This is how the participant will be shown publicly</small>
             </div>
           </div>
         </div>
@@ -235,10 +230,7 @@ onMounted(() => {
           <h3>Social Media</h3>
           <div class="social-form">
             <div class="social-field">
-              <div class="social-header">
-                <span class="social-icon large">📺</span>
-                <label for="twitch_username" class="form-label">Twitch Username</label>
-              </div>
+              <label for="twitch_username" class="form-label">Twitch Username</label>
               <input 
                 type="text" 
                 class="form-control" 
@@ -250,10 +242,7 @@ onMounted(() => {
             </div>
 
             <div class="social-field">
-              <div class="social-header">
-                <span class="social-icon large">💬</span>
-                <label for="discord_username" class="form-label">Discord Username</label>
-              </div>
+              <label for="discord_username" class="form-label">Discord Username</label>
               <input 
                 type="text" 
                 class="form-control" 
@@ -268,10 +257,10 @@ onMounted(() => {
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            ✅ Save Changes
+            Save Changes
           </button>
           <button type="button" @click="changeView('list')" class="btn btn-secondary">
-            ❌ Discard
+            Discard
           </button>
         </div>
       </form>
@@ -285,17 +274,17 @@ onMounted(() => {
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>🔧 Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>➕ New Items ({{ changes.post.length }})</h3>
+        <h3>New Items ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>❌ Deletions ({{ changes.delete.length }})</h3>
+        <h3>Deletions ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
@@ -304,7 +293,7 @@ onMounted(() => {
           ← Back to List
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          🚀 Apply to Production
+          Apply Changes
         </button>
       </div>
     </div>
@@ -327,22 +316,14 @@ onMounted(() => {
   font-size: 0.9em;
 }
 
-.social-icon {
-  font-size: 1.2em;
-}
-
-.social-icon.large {
-  font-size: 1.5em;
-}
-
 .social-label {
   font-weight: 600;
-  color: #666;
+  color: #999;
   min-width: 70px;
 }
 
 .social-value {
-  color: #333;
+  color: #ddd;
   font-family: monospace;
 }
 
@@ -362,17 +343,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.social-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-.social-header .form-label {
-  margin: 0;
 }
 
 @media (max-width: 768px) {

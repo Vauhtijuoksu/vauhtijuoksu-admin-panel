@@ -125,14 +125,14 @@ onMounted(() => {
         <h2>Incentives Management</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            <span class="icon">➕</span> Add New Incentive
+            Add New Incentive
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            <span class="icon">👁️</span> Preview Changes ({{ changeCount }})
+            Preview Changes ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -168,13 +168,13 @@ onMounted(() => {
           </div>
           <div class="item-actions">
             <button @click="openEdit(incentive)" class="btn btn-sm btn-primary">
-              🔧 Edit
+              Edit
             </button>
             <button 
               @click="remove(incentive)" 
               :class="isMarkedForDeletion(incentive) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(incentive) ? '↩️ Undo' : '❌ Delete' }}
+              {{ isMarkedForDeletion(incentive) ? 'Undo' : 'Delete' }}
             </button>
           </div>
         </div>
@@ -199,7 +199,7 @@ onMounted(() => {
             </div>
             <div class="item-actions">
               <button @click="removeAdded(incentive)" class="btn btn-sm btn-danger">
-                ❌ Remove
+                Remove
               </button>
             </div>
           </div>
@@ -240,7 +240,7 @@ onMounted(() => {
                   @click="delete selectedIncentive.game_id" 
                   class="btn btn-sm btn-danger"
                 >
-                  ❌ Remove Game Link
+                  Remove Game Link
                 </button>
                 <button 
                   v-if="!('game_id' in selectedIncentive)"
@@ -248,7 +248,7 @@ onMounted(() => {
                   @click="selectedIncentive.game_id = games[0]?.id" 
                   class="btn btn-sm btn-success"
                 >
-                  ➕ Link to Game
+                  Link to Game
                 </button>
               </div>
             </div>
@@ -349,7 +349,7 @@ onMounted(() => {
                   @click="selectedIncentive.milestones.splice(index, 1)" 
                   class="btn btn-sm btn-danger"
                 >
-                  ❌
+                  Remove
                 </button>
               </div>
             </div>
@@ -358,7 +358,7 @@ onMounted(() => {
               @click="addMilestone(selectedIncentive)" 
               class="btn btn-sm btn-secondary"
             >
-              ➕ Add Milestone
+              Add Milestone
             </button>
           </div>
 
@@ -382,7 +382,7 @@ onMounted(() => {
                   @click="selectedIncentive.option_parameters.splice(index, 1)" 
                   class="btn btn-sm btn-danger"
                 >
-                  ❌
+                  Remove
                 </button>
               </div>
             </div>
@@ -391,17 +391,17 @@ onMounted(() => {
               @click="addOptionParameter(selectedIncentive)" 
               class="btn btn-sm btn-secondary"
             >
-              ➕ Add Option
+              Add Option
             </button>
           </div>
         </div>
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            ✅ Save Changes
+            Save Changes
           </button>
           <button type="button" @click="changeView('list')" class="btn btn-secondary">
-            ❌ Discard
+            Discard
           </button>
         </div>
       </form>
@@ -415,17 +415,17 @@ onMounted(() => {
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>🔧 Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>➕ New Items ({{ changes.post.length }})</h3>
+        <h3>New Items ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>❌ Deletions ({{ changes.delete.length }})</h3>
+        <h3>Deletions ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
@@ -434,7 +434,7 @@ onMounted(() => {
           ← Back to List
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          🚀 Apply to Production
+          Apply Changes
         </button>
       </div>
     </div>
@@ -457,9 +457,9 @@ onMounted(() => {
 .type-config {
   margin-top: 20px;
   padding: 15px;
-  background: white;
+  background: #1a1a1a;
   border-radius: 6px;
-  border: 2px dashed #ddd;
+  border: 2px dashed #555;
 }
 
 .milestone-list,

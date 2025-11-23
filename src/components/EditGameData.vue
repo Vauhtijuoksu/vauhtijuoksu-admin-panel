@@ -98,14 +98,14 @@ onMounted(() => {
         <h2>Game Data Management</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            <span class="icon">➕</span> Add New Game
+            Add New Game
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            <span class="icon">👁️</span> Preview Changes ({{ changeCount }})
+            Preview Changes ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -135,15 +135,14 @@ onMounted(() => {
             </div>
           </div>
           <div class="item-actions">
-            <button @click="openEdit(game)" class="btn btn-sm btn-primary" title="Edit">
-              🔧 Edit
+            <button @click="openEdit(game)" class="btn btn-sm btn-primary">
+              Edit
             </button>
             <button 
               @click="remove(game)" 
               :class="isMarkedForDeletion(game) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
-              title="Delete"
             >
-              {{ isMarkedForDeletion(game) ? '↩️ Undo' : '❌ Delete' }}
+              {{ isMarkedForDeletion(game) ? 'Undo' : 'Delete' }}
             </button>
           </div>
         </div>
@@ -165,7 +164,7 @@ onMounted(() => {
             </div>
             <div class="item-actions">
               <button @click="removeAdded(game)" class="btn btn-sm btn-danger">
-                ❌ Remove
+                Remove
               </button>
             </div>
           </div>
@@ -287,9 +286,8 @@ onMounted(() => {
                 type="button"
                 @click="selectedGame.participants.splice(index, 1)" 
                 class="btn btn-sm btn-danger"
-                title="Remove participant"
               >
-                ❌
+                Remove
               </button>
             </div>
           </div>
@@ -298,16 +296,16 @@ onMounted(() => {
             @click="selectedGame.participants.push({ participant_id: participants[0]?.id, role: 'PLAYER' })" 
             class="btn btn-sm btn-secondary"
           >
-            ➕ Add Participant
+            Add Participant
           </button>
         </div>
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            ✅ Save Changes
+            Save Changes
           </button>
           <button @click="changeView('list')" class="btn btn-secondary">
-            ❌ Discard
+            Discard
           </button>
         </div>
       </form>
@@ -321,17 +319,17 @@ onMounted(() => {
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>🔧 Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>➕ New Items ({{ changes.post.length }})</h3>
+        <h3>New Items ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>❌ Deletions ({{ changes.delete.length }})</h3>
+        <h3>Deletions ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
@@ -340,7 +338,7 @@ onMounted(() => {
           ← Back to List
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          🚀 Apply to Production
+          Apply Changes
         </button>
       </div>
     </div>
@@ -364,8 +362,9 @@ onMounted(() => {
   gap: 10px;
   align-items: end;
   padding: 10px;
-  background: white;
+  background: #1a1a1a;
   border-radius: 4px;
+  border: 1px solid #444;
 }
 
 .participant-select, .participant-role {
@@ -375,8 +374,22 @@ onMounted(() => {
 
 .participant-select label, .participant-role label {
   font-size: 0.85em;
-  color: #666;
+  color: #bbb;
   margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.participant-row .form-control,
+.participant-row .form-select {
+  background: #2a2a2a;
+  border: 1px solid #555;
+  color: #e0e0e0;
+}
+
+.participant-row .form-control:focus,
+.participant-row .form-select:focus {
+  background: #333;
+  border-color: #007bff;
 }
 
 @media (max-width: 768px) {
