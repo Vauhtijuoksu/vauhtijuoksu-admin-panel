@@ -275,12 +275,13 @@ onMounted(() => {
               </div>
               <div class="participant-role">
                 <label>Role</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  v-model="participant.role" 
-                  placeholder="PLAYER, COMMENTATOR, HOST..."
+                <select 
+                  class="form-select" 
+                  v-model="participant.role"
                 >
+                  <option value="PLAYER">PLAYER</option>
+                  <option value="COUCH">COUCH</option>
+                </select>
               </div>
               <button 
                 type="button"
