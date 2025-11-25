@@ -23,9 +23,21 @@ const props = defineProps({
 const { games, streamMetaData } = toRefs(props);
 
 let game = ref("Loading...");
+let previousGameId = ref(null);
+
 watch(streamMetaData, () => {
   if (games.value.length){
-    game.value = games.value.find(x => x.id === streamMetaData.value.current_game_id)
+    const newGame = games.value.find(x => x.id === streamMetaData.value.current_game_id);
+    
+    // Auto-trigger Twitch API call when game changes (not initial load)
+    if (newGame && previousGameId.value !== null && 
+        previousGameId.value !== newGame.id && 
+        clientId && token && newGame.meta) {
+      setCurrentGameTwitch(newGame.meta);
+    }
+    
+    previousGameId.value = newGame?.id;
+    game.value = newGame;
   }
 })
 
