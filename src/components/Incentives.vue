@@ -5,10 +5,15 @@ import axios from 'axios'
 const props = defineProps({
   incentives: Object,
   gamedata: Object,
+  participants: Array,
 })
 
-const { incentives, gamedata } = toRefs(props);
+const { incentives, gamedata, participants } = toRefs(props);
 
+const getParticipantName = (participantId) => {
+  const participant = participants.value.find(p => p.id === participantId);
+  return participant?.display_name || 'Unknown';
+};
 
 </script>
 
@@ -25,6 +30,14 @@ const { incentives, gamedata } = toRefs(props);
 
       <div v-if="gamedata.length && incentive.game_id">
         <p>Peli: {{gamedata.find(x => x.id === incentive.game_id).game}}</p>
+        <div v-if="gamedata.find(x => x.id === incentive.game_id).participants && gamedata.find(x => x.id === incentive.game_id).participants.length > 0">
+          <p v-if="gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'PLAYER').length > 0">
+            Pelaajat: {{ gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'PLAYER').map(p => getParticipantName(p.participant_id)).join(', ') }}
+          </p>
+          <p v-if="gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'COUCH').length > 0">
+            Sohvalla: {{ gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'COUCH').map(p => getParticipantName(p.participant_id)).join(', ') }}
+          </p>
+        </div>
       </div>
       <p>Sulkeutuu: {{new Date(incentive.end_time).toLocaleString("fi-FI")}}</p>
       <div v-if="incentive.type === 'milestone'">

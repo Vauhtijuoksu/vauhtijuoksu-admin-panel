@@ -137,36 +137,27 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="items-grid">
+      <div class="incentives-list-compact">
         <div 
           v-for="incentive in incentives" 
           :key="incentive.id" 
-          class="item-card"
-          :class="{ 'item-edited': isEdited(incentive), 'item-deleted': isMarkedForDeletion(incentive) }"
+          class="incentive-row-compact"
+          :class="{ 'row-edited': isEdited(incentive), 'row-deleted': isMarkedForDeletion(incentive) }"
         >
-          <div class="item-header">
-            <h3>{{ incentive.title }}</h3>
-            <div class="item-badges">
+          <div class="incentive-info">
+            <div class="incentive-header-compact">
+              <span class="incentive-title">{{ incentive.title }}</span>
               <span v-if="isEdited(incentive)" class="badge badge-warning">Edited</span>
               <span v-if="isMarkedForDeletion(incentive)" class="badge badge-danger">Deleted</span>
               <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
             </div>
-          </div>
-          <div class="item-details">
-            <div class="detail-row" v-if="incentive.game_id">
-              <span class="label">Game:</span>
-              <span class="value">{{ getGameName(incentive.game_id) }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="label">Ends:</span>
-              <span class="value">{{ incentive.end_time }}</span>
-            </div>
-            <div class="detail-row" v-if="incentive.info">
-              <span class="label">Info:</span>
-              <span class="value">{{ incentive.info }}</span>
+            <div class="incentive-details-compact">
+              <span v-if="incentive.game_id" class="incentive-meta">🎮 {{ getGameName(incentive.game_id) }}</span>
+              <span class="incentive-meta">⏰ {{ incentive.end_time }}</span>
+              <span v-if="incentive.info" class="incentive-info-text">{{ incentive.info }}</span>
             </div>
           </div>
-          <div class="item-actions">
+          <div class="incentive-actions">
             <button @click="openEdit(incentive)" class="btn btn-sm btn-primary">
               Edit
             </button>
@@ -182,22 +173,19 @@ onMounted(() => {
 
       <div v-if="changes.post.length > 0" class="pending-section">
         <h3>Pending New Incentives</h3>
-        <div class="items-grid">
-          <div v-for="incentive in changes.post" :key="incentive.title" class="item-card item-new">
-            <div class="item-header">
-              <h3>{{ incentive.title }}</h3>
-              <div class="item-badges">
+        <div class="incentives-list-compact">
+          <div v-for="incentive in changes.post" :key="incentive.title" class="incentive-row-compact row-new">
+            <div class="incentive-info">
+              <div class="incentive-header-compact">
+                <span class="incentive-title">{{ incentive.title }}</span>
                 <span class="badge badge-success">New</span>
                 <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
               </div>
-            </div>
-            <div class="item-details">
-              <div class="detail-row">
-                <span class="label">Ends:</span>
-                <span class="value">{{ incentive.end_time }}</span>
+              <div class="incentive-details-compact">
+                <span class="incentive-meta">⏰ {{ incentive.end_time }}</span>
               </div>
             </div>
-            <div class="item-actions">
+            <div class="incentive-actions">
               <button @click="removeAdded(incentive)" class="btn btn-sm btn-danger">
                 Remove
               </button>
@@ -444,6 +432,97 @@ onMounted(() => {
 <style scoped>
 @import '@/css/edit-styles.css';
 
+/* Compact list layout */
+.incentives-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.incentive-row-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.2s;
+  color: #e0e0e0;
+}
+
+.incentive-row-compact:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border-color: #555;
+}
+
+.incentive-row-compact.row-edited {
+  border-left: 4px solid #ffc107;
+}
+
+.incentive-row-compact.row-deleted {
+  border-left: 4px solid #dc3545;
+  opacity: 0.7;
+}
+
+.incentive-row-compact.row-new {
+  border-left: 4px solid #28a745;
+}
+
+.incentive-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.incentive-header-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.incentive-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.incentive-details-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85em;
+  color: #bbb;
+}
+
+.incentive-meta {
+  color: #999;
+}
+
+.incentive-info-text {
+  color: #aaa;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.incentive-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.badge-info {
+  background: #17a2b8;
+  color: white;
+}
+
+/* Form styles */
 .game-selector {
   display: flex;
   gap: 10px;
@@ -483,13 +562,28 @@ onMounted(() => {
   flex: 1;
 }
 
-.badge-info {
-  background: #17a2b8;
-  color: white;
-}
-
 textarea.form-control {
   resize: vertical;
   min-height: 80px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .incentive-row-compact {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .incentive-actions {
+    justify-content: stretch;
+  }
+  
+  .incentive-actions button {
+    flex: 1;
+  }
+  
+  .incentive-info-text {
+    max-width: 100%;
+  }
 }
 </style>

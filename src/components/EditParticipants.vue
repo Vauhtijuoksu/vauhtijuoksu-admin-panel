@@ -125,36 +125,26 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="items-grid">
+      <div class="participants-list-compact">
         <div 
           v-for="participant in participants" 
           :key="participant.id" 
-          class="item-card"
-          :class="{ 'item-edited': isEdited(participant), 'item-deleted': isMarkedForDeletion(participant) }"
+          class="participant-row-compact"
+          :class="{ 'row-edited': isEdited(participant), 'row-deleted': isMarkedForDeletion(participant) }"
         >
-          <div class="item-header">
-            <h3>{{ participant.display_name }}</h3>
-            <div class="item-badges">
+          <div class="participant-info">
+            <div class="participant-header-compact">
+              <span class="participant-name">{{ participant.display_name }}</span>
               <span v-if="isEdited(participant)" class="badge badge-warning">Edited</span>
               <span v-if="isMarkedForDeletion(participant)" class="badge badge-danger">Deleted</span>
             </div>
-          </div>
-          <div class="item-details">
-            <div class="social-links">
-              <div class="social-item" v-if="getTwitchHandle(participant) !== '-'">
-                <span class="social-label">Twitch:</span>
-                <span class="social-value">{{ getTwitchHandle(participant) }}</span>
-              </div>
-              <div class="social-item" v-if="getDiscordHandle(participant) !== '-'">
-                <span class="social-label">Discord:</span>
-                <span class="social-value">{{ getDiscordHandle(participant) }}</span>
-              </div>
-              <div v-if="getTwitchHandle(participant) === '-' && getDiscordHandle(participant) === '-'" class="no-socials">
-                <span class="text-muted">No social media linked</span>
-              </div>
+            <div class="participant-details-compact">
+              <span v-if="getTwitchHandle(participant) !== '-'" class="participant-meta">🎮 {{ getTwitchHandle(participant) }}</span>
+              <span v-if="getDiscordHandle(participant) !== '-'" class="participant-meta">💬 {{ getDiscordHandle(participant) }}</span>
+              <span v-if="getTwitchHandle(participant) === '-' && getDiscordHandle(participant) === '-'" class="text-muted-small">No socials</span>
             </div>
           </div>
-          <div class="item-actions">
+          <div class="participant-actions">
             <button @click="openEdit(participant)" class="btn btn-sm btn-primary">
               Edit
             </button>
@@ -170,25 +160,19 @@ onMounted(() => {
 
       <div v-if="changes.post.length > 0" class="pending-section">
         <h3>Pending New Participants</h3>
-        <div class="items-grid">
-          <div v-for="participant in changes.post" :key="participant.display_name" class="item-card item-new">
-            <div class="item-header">
-              <h3>{{ participant.display_name }}</h3>
-              <span class="badge badge-success">New</span>
-            </div>
-            <div class="item-details">
-              <div class="social-links">
-                <div class="social-item" v-if="getTwitchHandle(participant) !== '-'">
-                  <span class="social-label">Twitch:</span>
-                  <span class="social-value">{{ getTwitchHandle(participant) }}</span>
-                </div>
-                <div class="social-item" v-if="getDiscordHandle(participant) !== '-'">
-                  <span class="social-label">Discord:</span>
-                  <span class="social-value">{{ getDiscordHandle(participant) }}</span>
-                </div>
+        <div class="participants-list-compact">
+          <div v-for="participant in changes.post" :key="participant.display_name" class="participant-row-compact row-new">
+            <div class="participant-info">
+              <div class="participant-header-compact">
+                <span class="participant-name">{{ participant.display_name }}</span>
+                <span class="badge badge-success">New</span>
+              </div>
+              <div class="participant-details-compact">
+                <span v-if="getTwitchHandle(participant) !== '-'" class="participant-meta">🎮 {{ getTwitchHandle(participant) }}</span>
+                <span v-if="getDiscordHandle(participant) !== '-'" class="participant-meta">💬 {{ getDiscordHandle(participant) }}</span>
               </div>
             </div>
-            <div class="item-actions">
+            <div class="participant-actions">
               <button @click="removeAdded(participant)" class="btn btn-sm btn-danger">
                 Remove
               </button>
@@ -238,7 +222,6 @@ onMounted(() => {
                 v-model='twitchUsername'
                 placeholder="username"
               >
-              <small class="form-text">Without @ symbol</small>
             </div>
 
             <div class="social-field">
@@ -248,9 +231,8 @@ onMounted(() => {
                 class="form-control" 
                 id="discord_username" 
                 v-model='discordUsername'
-                placeholder="username#0000"
+                placeholder="username"
               >
-              <small class="form-text">Include discriminator if applicable</small>
             </div>
           </div>
         </div>
@@ -303,36 +285,89 @@ onMounted(() => {
 <style scoped>
 @import '@/css/edit-styles.css';
 
-.social-links {
+/* Compact list layout */
+.participants-list-compact {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 30px;
 }
 
-.social-item {
+.participant-row-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.2s;
+  color: #e0e0e0;
+}
+
+.participant-row-compact:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border-color: #555;
+}
+
+.participant-row-compact.row-edited {
+  border-left: 4px solid #ffc107;
+}
+
+.participant-row-compact.row-deleted {
+  border-left: 4px solid #dc3545;
+  opacity: 0.7;
+}
+
+.participant-row-compact.row-new {
+  border-left: 4px solid #28a745;
+}
+
+.participant-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.participant-header-compact {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.participant-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.participant-details-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85em;
+  color: #bbb;
+}
+
+.participant-meta {
+  color: #999;
+}
+
+.text-muted-small {
+  color: #777;
+  font-style: italic;
   font-size: 0.9em;
 }
 
-.social-label {
-  font-weight: 600;
-  color: #999;
-  min-width: 70px;
+.participant-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.social-value {
-  color: #ddd;
-  font-family: monospace;
-}
-
-.no-socials {
-  padding: 10px;
-  text-align: center;
-  font-style: italic;
-}
-
+/* Form styles */
 .social-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -345,7 +380,21 @@ onMounted(() => {
   gap: 8px;
 }
 
+/* Mobile responsive */
 @media (max-width: 768px) {
+  .participant-row-compact {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .participant-actions {
+    justify-content: stretch;
+  }
+  
+  .participant-actions button {
+    flex: 1;
+  }
+  
   .social-form {
     grid-template-columns: 1fr;
   }

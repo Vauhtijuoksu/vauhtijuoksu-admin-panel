@@ -27,7 +27,6 @@ const {
   // Transform response: format timestamps
   game.start_time = formatTimestamp(game.start_time)
   game.end_time = formatTimestamp(game.end_time)
-  delete game.players;
   return game;
 });
 
@@ -81,6 +80,22 @@ const changeCount = computed(() => {
          changes.value.delete.length;
 });
 
+const getParticipantName = (participantId) => {
+  const participant = participants.value.find(p => p.id === participantId);
+  return participant?.display_name || 'Unknown';
+};
+
+// Get unique values for autocomplete
+const uniqueDevices = computed(() => {
+  const devices = games.value.map(g => g.device).filter(d => d);
+  return [...new Set(devices)].sort();
+});
+
+const uniqueImageFilenames = computed(() => {
+  const filenames = games.value.map(g => g.img_filename).filter(f => f);
+  return [...new Set(filenames)].sort();
+});
+
 onMounted(() => {
   getGames();
   getParticipants();
@@ -110,31 +125,35 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="items-grid">
+      <div class="games-list-compact">
         <div 
           v-for="game in games" 
           :key="game.id" 
-          class="item-card"
-          :class="{ 'item-edited': isEdited(game), 'item-deleted': isMarkedForDeletion(game) }"
+          class="game-row-compact"
+          :class="{ 'row-edited': isEdited(game), 'row-deleted': isMarkedForDeletion(game) }"
         >
-          <div class="item-header">
-            <h3>{{ game.game }}</h3>
-            <div class="item-badges">
+          <div class="game-info">
+            <div class="game-header-compact">
+              <span class="game-title">{{ game.game }}</span>
               <span v-if="isEdited(game)" class="badge badge-warning">Edited</span>
               <span v-if="isMarkedForDeletion(game)" class="badge badge-danger">Deleted</span>
             </div>
-          </div>
-          <div class="item-details">
-            <div class="detail-row">
-              <span class="label">Time:</span>
-              <span class="value">{{ game.start_time }} - {{ game.end_time }}</span>
+            <div class="game-details-compact">
+              <span class="game-meta">{{ game.start_time }} - {{ game.end_time }}</span>
+              <span class="game-meta">{{ game.category }}</span>
             </div>
-            <div class="detail-row">
-              <span class="label">Category:</span>
-              <span class="value">{{ game.category }}</span>
+            <div v-if="game.participants && game.participants.length > 0" class="game-players">
+              <span 
+                v-for="(participant, idx) in game.participants" 
+                :key="idx"
+                class="player-tag"
+                :class="{'player-couch': participant.role === 'COUCH'}"
+              >
+                {{ getParticipantName(participant.participant_id) }}<span v-if="participant.role === 'COUCH'"> (C)</span>
+              </span>
             </div>
           </div>
-          <div class="item-actions">
+          <div class="game-actions">
             <button @click="openEdit(game)" class="btn btn-sm btn-primary">
               Edit
             </button>
@@ -150,19 +169,18 @@ onMounted(() => {
 
       <div v-if="changes.post.length > 0" class="pending-section">
         <h3>Pending New Games</h3>
-        <div class="items-grid">
-          <div v-for="game in changes.post" :key="game.game" class="item-card item-new">
-            <div class="item-header">
-              <h3>{{ game.game }}</h3>
-              <span class="badge badge-success">New</span>
-            </div>
-            <div class="item-details">
-              <div class="detail-row">
-                <span class="label">Time:</span>
-                <span class="value">{{ game.start_time }} - {{ game.end_time }}</span>
+        <div class="games-list-compact">
+          <div v-for="game in changes.post" :key="game.game" class="game-row-compact row-new">
+            <div class="game-info">
+              <div class="game-header-compact">
+                <span class="game-title">{{ game.game }}</span>
+                <span class="badge badge-success">New</span>
+              </div>
+              <div class="game-details-compact">
+                <span class="game-meta">{{ game.start_time }} - {{ game.end_time }}</span>
               </div>
             </div>
-            <div class="item-actions">
+            <div class="game-actions">
               <button @click="removeAdded(game)" class="btn btn-sm btn-danger">
                 Remove
               </button>
@@ -234,7 +252,18 @@ onMounted(() => {
             </div>
             <div class="form-group">
               <label for="device" class="form-label">Device</label>
-              <input type="text" class="form-control" id="device" v-model='selectedGame.device'>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="device" 
+                v-model='selectedGame.device'
+                list="device-list"
+                placeholder="Select or type new device"
+              >
+              <datalist id="device-list">
+                <option v-for="device in uniqueDevices" :key="device" :value="device"></option>
+              </datalist>
+              <small class="form-text">Select from existing or type new</small>
             </div>
           </div>
 
@@ -245,7 +274,18 @@ onMounted(() => {
             </div>
             <div class="form-group">
               <label for="img_filename" class="form-label">Image Filename</label>
-              <input type="text" class="form-control" id="img_filename" v-model='selectedGame.img_filename'>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="img_filename" 
+                v-model='selectedGame.img_filename'
+                list="image-list"
+                placeholder="Select or type new filename"
+              >
+              <datalist id="image-list">
+                <option v-for="filename in uniqueImageFilenames" :key="filename" :value="filename"></option>
+              </datalist>
+              <small class="form-text">Select from existing or type new</small>
             </div>
           </div>
 
@@ -349,7 +389,105 @@ onMounted(() => {
 <style scoped>
 @import '@/css/edit-styles.css';
 
-/* Component-specific styles */
+/* Compact list layout */
+.games-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.game-row-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 10px 15px;
+  transition: all 0.2s;
+  color: #e0e0e0;
+}
+
+.game-row-compact:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border-color: #555;
+}
+
+.game-row-compact.row-edited {
+  border-left: 4px solid #ffc107;
+}
+
+.game-row-compact.row-deleted {
+  border-left: 4px solid #dc3545;
+  opacity: 0.7;
+}
+
+.game-row-compact.row-new {
+  border-left: 4px solid #28a745;
+}
+
+.game-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.game-header-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.game-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.game-details-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.85em;
+  color: #bbb;
+  margin-bottom: 6px;
+}
+
+.game-meta {
+  color: #999;
+}
+
+.game-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.player-tag {
+  background: #1a4d7a;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.9em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.player-tag.player-couch {
+  background: #6a4d1a;
+}
+
+.game-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Form participant styles */
 .participants-list {
   display: flex;
   flex-direction: column;
@@ -393,7 +531,21 @@ onMounted(() => {
   border-color: #007bff;
 }
 
+/* Mobile responsive - keep it great! */
 @media (max-width: 768px) {
+  .game-row-compact {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .game-actions {
+    justify-content: stretch;
+  }
+  
+  .game-actions button {
+    flex: 1;
+  }
+  
   .participant-row {
     grid-template-columns: 1fr;
   }

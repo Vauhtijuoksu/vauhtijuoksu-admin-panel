@@ -22,6 +22,7 @@ const donations = ref([]);
 const games = ref([]);
 const streamMetaData = ref({});
 const incentives = ref({});
+const participants = ref([]);
 
 const showEightCounters = ref(false);
 
@@ -57,6 +58,13 @@ const getGames = async () => {
   setTimeout(getIncentives, 20000);
 }
 
+const getParticipants = async () => {
+  const response = await api.get('/participants');
+  if (response?.data) {
+    participants.value = response.data;
+  }
+}
+
 const username = ref(localStorage.getItem('username'));
 onMounted(()=> {
   if (username.value) {
@@ -68,6 +76,7 @@ getStreamMetaData();
 getDonations();
 getGames();
 getIncentives();
+getParticipants();
 </script>
 
 <template>
@@ -120,7 +129,7 @@ getIncentives();
         <Donations :url="url" :games="games" :donations="donations" :incentives="incentives"/>
       </div>
       <div class="scrollable incentives">
-        <Incentives :incentives="incentives" :gamedata="games"/>
+        <Incentives :incentives="incentives" :gamedata="games" :participants="participants"/>
       </div>
     </div>
   </div>
