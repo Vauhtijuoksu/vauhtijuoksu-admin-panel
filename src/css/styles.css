@@ -6,10 +6,14 @@ body {
     font-size: 24px;
     background-color: #081536;
     border-bottom: 3px solid #1c2039;
+    padding: 8px 16px;
+    align-items: center;
+    gap: 16px;
 }
 .admin{
     background-color: #08112a;
     border-bottom: 3px solid #1c2039;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 html, body, #app{
   height: 100vh;
@@ -53,12 +57,7 @@ html, body, #app{
     color: #e0e0e0;
 }
 
-.donations {
-    width: 70%;
-}
-.incentives {
-    width: 30%;
-}
+/* Section widths are now dynamically controlled in MainView */
 #incentiveoutput {
     margin-left: 5px;
     width: 95%;
@@ -73,28 +72,10 @@ html, body, #app{
     width: 50px;
     display: inline-block;
 }
-#admin div{
-    text-align: center;
-
-}
 button{
     margin: 3px;
 }
-.games{
-    width: 300px;
-}
-.games div{
-    height: 60px;
-    font-size: 24px;
-    line-height: 20px;
-
-}
-.stream-info{
-    width: 400px;
-}
-.donflag{
-    width: 200px;
-}
+/* Admin section widths are now controlled in MainView scoped styles */
 .incentive_info{
     position: relative;
 

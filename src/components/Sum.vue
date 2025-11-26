@@ -18,10 +18,19 @@ watch(donations, () => {
 </script>
 
 <template>
-  <div>
-  Kerätty: {{ sum }} €
+  <div class="sum-container">
+    <span class="sum-amount">{{ sum.toFixed(2) }} €</span>
   </div>
 </template>
 
 <style scoped>
+.sum-container {
+  padding: 4px 16px;
+}
+
+.sum-amount {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50;
+}
 </style>

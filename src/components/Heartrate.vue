@@ -39,10 +39,13 @@ function getRate() {
 </script>
 
 <template>
-  <div :id="'rate'+sensor" style="display: none">
-    {{ sensor }}: {{ rate }}❤️
+  <div :id="'rate'+sensor" class="heartrate" style="display: none">
+    {{ rate }}❤️
   </div>
 </template>
 
 <style scoped>
+.heartrate {
+  padding: 4px 8px;
+}
 </style>

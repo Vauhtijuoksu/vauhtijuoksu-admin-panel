@@ -17,10 +17,15 @@ watch(streamMetaData, () => {
 </script>
 
 <template>
-  <div>
-  {{ game }}
+  <div class="game-container">
+    {{ game }}
   </div>
 </template>
 
 <style scoped>
+.game-container {
+  padding: 4px 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
 </style>

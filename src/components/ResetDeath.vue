@@ -10,9 +10,15 @@ const resetDeaths = async () => {
 </script>
 
 <template>
-
-  <button @click="resetDeaths" type="submit" class="btn btn-primary">Nollaa kuolemalaskurit</button>
+  <button @click="resetDeaths" type="submit" class="btn btn-primary btn-compact">
+    🔄 Nollaa kuolemalaskurit
+  </button>
 </template>
 
 <style scoped>
+.btn-compact {
+  padding: 6px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
 </style>

@@ -11,9 +11,16 @@ const set_donations_flag = async () => {
 </script>
 
 <template>
-  ilmoita pelaajalle että lahjoituksia on luettavana
-  <button @click="set_donations_flag" type="submit" class="btn btn-primary">ilmoita</button>
+  <button @click="set_donations_flag" type="submit" class="btn btn-warning btn-compact">
+    📢 Ilmoita lahjoituksista pelaajalle
+  </button>
 </template>
 
 <style scoped>
+.btn-compact {
+  padding: 6px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  font-weight: 600;
+}
 </style>

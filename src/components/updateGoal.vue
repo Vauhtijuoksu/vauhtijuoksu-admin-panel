@@ -27,13 +27,29 @@ const postStreamInfo = async () => {
 </script>
 
 <template>
-<form @submit.prevent="postStreamInfo">
-  <div class="mb-3">
-    <input type="number" v-model="goal" class="form-control">
-  </div>
-  <button type="submit" class="btn btn-primary">Päivitä tavoite</button>
+<form @submit.prevent="postStreamInfo" class="goal-form">
+  <input type="number" v-model="goal" class="form-control" placeholder="Tavoite €">
+  <button type="submit" class="btn btn-primary btn-compact">💾 Tallenna</button>
 </form>
 </template>
 
 <style scoped>
+.goal-form {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.form-control {
+  width: 120px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.btn-compact {
+  padding: 6px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
 </style>
