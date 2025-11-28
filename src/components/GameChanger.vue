@@ -81,11 +81,15 @@ const setCurrentGame = async (direction) => {
 </script>
 
 <template>
-<div>
-  {{ game.game }}
-</div>
-<button @click="setCurrentGame(-1)" type="submit" class="btn btn-primary">Edellinen</button>
-<button @click="setCurrentGame(1)" type="submit" class="btn btn-primary">Seuraava</button>
+  <div class="flex-column">
+    <div style="width: 20vw; height: 2.2em; line-height: 1.1" class="flex-column flex-center">
+      {{ game.game }}
+    </div>
+    <div class="flex-row space-around">
+      <button @click="setCurrentGame(-1)" type="submit" class="btn btn-primary">Edellinen</button>
+      <button @click="setCurrentGame(1)" type="submit" class="btn btn-primary">Seuraava</button>
+    </div>
+  </div>
 </template>
 
 <style scoped>

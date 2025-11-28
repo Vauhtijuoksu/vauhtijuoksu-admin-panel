@@ -24,6 +24,38 @@ html, body, #app{
     flex-direction: row;
     justify-content: space-between;
 }
+.flex-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.flex-center {
+    justify-content: center;
+    align-items: center;
+}
+.space-around {
+    justify-content: space-around;
+}
+.waiting-for-content {
+    background: #785454 linear-gradient(to right, #785454 30%, #c18686 50%, #785454 70%);
+    -webkit-background-clip: text;
+
+    background-repeat: no-repeat;
+    -webkit-text-fill-color: transparent;
+    animation: waitForBg 8s linear infinite alternate;
+    background-size: 500% 250%;
+    background-position: 0 0;
+    font-style: italic;
+}
+@keyframes waitForBg {
+    0% {
+        background-position: -200% 0;
+    }
+    0% {
+        background-position: 100% 0;
+    }
+
+}
 
 .no-login button{
     background-color: #9e2c2c;

@@ -2,6 +2,7 @@
 import {onMounted, ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
+import { config } from '@/config'
 
 const props = defineProps({
   url: String,
@@ -71,7 +72,12 @@ const censorName = async (id, name) => {
         <td>{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
         <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
-        <td>{{ donation.message }}</td>
+        <td>
+          <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 60000 * 1000 * config.emptyDonationLoadSeconds))">
+            * Odottaa viestiä *
+          </span>
+          {{ donation.message }}
+        </td>
         <td><span @click="router.push(`/edit/donation/${donation.id}`)" title='Edit donation message'>✏️</span></td>
         <td>
           <div class="incentive_info">

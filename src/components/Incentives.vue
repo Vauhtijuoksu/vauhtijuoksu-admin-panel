@@ -1,6 +1,7 @@
 <script setup>
 import {ref, toRefs, watch} from 'vue'
 import axios from 'axios'
+import { config } from '@/config'
 
 const props = defineProps({
   incentives: Object,
@@ -20,7 +21,7 @@ const getParticipantName = (participantId) => {
 <template>
   <tr v-for="incentive in incentives" :key="incentive.id">
     <div v-if="new Date(incentive.end_time) >= new Date(new Date().getTime() - 60 * 60000)">
-      <div v-if="new Date(incentive.end_time) >= new Date()">
+      <div v-if="new Date(incentive.end_time) >= new Date() && (!config.incentiveLockedBeforeHours || new Date(incentive.end_time).getTime() < Date.now() + config.incentiveLockedBeforeHours * 1000 * 60 * 60)">
         <h4>{{ incentive.title }}</h4>
       </div>
       <div v-else>
