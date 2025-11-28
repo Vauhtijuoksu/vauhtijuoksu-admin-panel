@@ -82,7 +82,7 @@ const setCurrentGame = async (direction) => {
 
 <template>
   <div class="flex-column">
-    <div style="width: 20vw; height: 2.2em; line-height: 1.1" class="flex-column flex-center">
+    <div style="width: 15vw; height: 2.2em; line-height: 1.1" class="flex-column flex-center">
       {{ game.game }}
     </div>
     <div class="flex-row space-around">

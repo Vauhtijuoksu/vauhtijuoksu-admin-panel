@@ -73,7 +73,7 @@ const censorName = async (id, name) => {
         <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
         <td>{{ donation.name }}</td>
         <td>
-          <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 60000 * 1000 * config.emptyDonationLoadSeconds))">
+          <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 1000 * config.emptyDonationLoadSeconds))">
             * Odottaa viestiä *
           </span>
           {{ donation.message }}
