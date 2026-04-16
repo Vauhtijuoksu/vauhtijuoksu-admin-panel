@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://api.dev.vauhtijuoksu.fi';
+const API_URL = 'https://api.vauhtijuoksu.fi';
 
 /**
  * Get authentication credentials from localStorage

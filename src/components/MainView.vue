@@ -16,7 +16,7 @@ import Incentives from "./Incentives.vue";
 import DonationsFlag from "./DonationsFlag.vue";
 import Timetable from "./Timetable.vue";
 
-const url = 'https://api.dev.vauhtijuoksu.fi';
+const url = 'https://api.vauhtijuoksu.fi';
 
 const donations = ref([]);
 const games = ref([]);

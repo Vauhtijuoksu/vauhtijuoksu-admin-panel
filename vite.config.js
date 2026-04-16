@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: "https://api.dev.vauhtijuoksu.fi",
+        target: "https://api.vauhtijuoksu.fi",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
