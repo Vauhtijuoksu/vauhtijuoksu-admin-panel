@@ -22,6 +22,11 @@ const isTopOption = (status, allStatuses) => {
   return max > 0 && status.amount === max;
 };
 
+const gapToLeader = (status, allStatuses) => {
+  const max = Math.max(...allStatuses.map(s => s.amount));
+  return max - status.amount;
+};
+
 const sortMap = ref({});
 
 const toggleSort = (id) => {
@@ -94,6 +99,14 @@ const extendEndTime = async (incentive) => {
             <div class="milestone-bar">
               <div class="milestone-bar-fill" :style="{ width: Math.min(100, (incentive.total_amount / incentive.milestones[0]) * 100) + '%' }"></div>
             </div>
+            <div class="milestone-remaining">
+              <span v-if="incentive.total_amount >= incentive.milestones[0]" class="milestone-reached">
+                ✅ Tavoite saavutettu! (+{{ (incentive.total_amount - incentive.milestones[0]).toFixed(2) }}€ yli)
+              </span>
+              <span v-else class="milestone-left">
+                ⏳ <strong>{{ (incentive.milestones[0] - incentive.total_amount).toFixed(2) }}€</strong> jäljellä tavoitteeseen
+              </span>
+            </div>
           </div>
       </div>
       <div v-if="incentive.type === 'option'">
@@ -104,8 +117,11 @@ const extendEndTime = async (incentive) => {
         </button>
       </div>
       <tr v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
-        <span v-if="isTopOption(status, incentive.status)">👑 </span>{{status.option}}
+        <span class="crown-prefix" :class="{ 'is-leader': isTopOption(status, incentive.status) }">👑 </span>{{status.option}}
         {{status.amount.toFixed(2)}}e
+        <span v-if="!isTopOption(status, incentive.status) && gapToLeader(status, incentive.status) > 0" class="gap-to-leader">
+          (−{{ gapToLeader(status, incentive.status).toFixed(2) }}€)
+        </span>
       </tr>
       </div>
       <div v-if="incentive.type === 'open'">
@@ -116,8 +132,11 @@ const extendEndTime = async (incentive) => {
         </button>
       </div>
       <tr v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
-        <span v-if="isTopOption(status, incentive.status)">👑 </span>{{status.option}}
+        <span class="crown-prefix" :class="{ 'is-leader': isTopOption(status, incentive.status) }">👑 </span>{{status.option}}
         {{status.amount.toFixed(2)}}e
+        <span v-if="!isTopOption(status, incentive.status) && gapToLeader(status, incentive.status) > 0" class="gap-to-leader">
+          (−{{ gapToLeader(status, incentive.status).toFixed(2) }}€)
+        </span>
       </tr>
       </div>
       <hr/>
@@ -180,6 +199,29 @@ const extendEndTime = async (incentive) => {
     height: 100%;
     background: linear-gradient(90deg, #4ade80, #22c55e);
     transition: width 0.3s ease;
+  }
+  .milestone-remaining {
+    margin-top: 0.4rem;
+    font-size: 0.95rem;
+  }
+  .milestone-left {
+    color: #ffd166;
+  }
+  .milestone-left strong {
+    color: #fff;
+    font-size: 1.05rem;
+  }
+  .milestone-reached {
+    color: #4ade80;
+    font-weight: 600;
+  }
+  .gap-to-leader {
+    color: #adb5bd;
+    font-size: 0.9rem;
+    margin-left: 0.35rem;
+  }
+  .crown-prefix:not(.is-leader) {
+    visibility: hidden;
   }
   .subheader-row {
     display: flex;
