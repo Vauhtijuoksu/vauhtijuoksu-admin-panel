@@ -12,7 +12,7 @@ const set_donations_flag = async () => {
 
 <template>
   <button @click="set_donations_flag" type="submit" class="btn btn-warning btn-compact">
-    📢 Ilmoita lahjoituksista pelaajalle
+    📢 Ilmoita lahjoituksista<br>pelaajalle
   </button>
 </template>
 

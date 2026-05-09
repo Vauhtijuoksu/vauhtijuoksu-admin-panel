@@ -11,7 +11,7 @@ const resetDeaths = async () => {
 
 <template>
   <button @click="resetDeaths" type="submit" class="btn btn-primary btn-compact">
-    🔄 Nollaa kuolemalaskurit
+    🔄 Nollaa<br>kuolemalaskurit
   </button>
 </template>
 

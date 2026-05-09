@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, toRefs, watch} from 'vue'
+import {computed, onMounted, ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 import { config } from '@/config'
@@ -38,6 +38,18 @@ const markDonation = async (id, readValue) => {
   }
 }
 
+const fakeDonation = {
+  id: 'fake-test',
+  external_id: 'fake-test',
+  timestamp: new Date().toISOString(),
+  name: 'TestiAnonyymi',
+  message: 'Fake testilahjoitus mark/unmark-napin testaamiseen',
+  read: false,
+  incentives: [],
+  amount: 42,
+}
+const displayDonations = computed(() => [...donations.value, fakeDonation])
+
 const censorName = async (id, name) => {
   let conf = confirm('Haluatko sensuroida käyttäjänimen ' + name + '?');
   if (conf){
@@ -54,29 +66,35 @@ const censorName = async (id, name) => {
   <table class="table">
     <thead>
       <tr>
-        <th v-if="islogged" scope="col">read</th>
+        <th v-if="islogged" scope="col"></th>
         <th scope="col">timestamp</th>
-        <th v-if="islogged"  scope="col"></th>
         <th scope="col">name</th>
         <th scope="col">message</th>
-        <th scope="col">edit</th>
-        <th scope="col">codeinfo</th>
+        <th scope="col"></th>
+        <th scope="col"></th>
         <th scope="col">amount</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="donation in donations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
-        <td v-if="islogged"><button @click="markDonation(donation.id, !donation.read)" type="submit" class="btn btn-primary"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
-        <td class="timestamp-cell">{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
-        <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
-        <td class="name-cell">{{ donation.name }}</td>
-        <td>
-          <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 1000 * config.emptyDonationLoadSeconds))">
-            * Odottaa viestiä *
-          </span>
-          {{ donation.message }}
+      <tr v-for="donation in displayDonations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
+        <td v-if="islogged" class="read-cell"><button @click="markDonation(donation.id, !donation.read)" type="submit" class="btn btn-primary read-btn"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
+        <td class="timestamp-cell">
+          <div>{{ new Date(donation.timestamp).toLocaleDateString("fi-FI") }}</div>
+          <div>{{ new Date(donation.timestamp).toLocaleTimeString("fi-FI") }}</div>
         </td>
-        <td><span @click="router.push(`/edit/donation/${donation.id}`)" title='Edit donation message'>✏️</span></td>
+        <td class="name-cell">
+          {{ donation.name }}
+          <span v-if="islogged" class="censor" @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span>
+        </td>
+        <td class="message-cell">
+          <div class="message-inner">
+            <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 1000 * config.emptyDonationLoadSeconds))">
+              * Odottaa viestiä *
+            </span>
+            {{ donation.message }}
+          </div>
+        </td>
+        <td><span class="action-icon" @click="router.push(`/edit/donation/${donation.id}`)" title='Edit donation message'>✏️</span></td>
         <td>
           <div class="incentive_info">
             📄
@@ -96,7 +114,7 @@ const censorName = async (id, name) => {
             </div>
           </div>
         </td>
-        <td>{{ donation.amount }}e</td>
+        <td class="amount-cell">{{ donation.amount }}e</td>
       </tr>
     </tbody>
   </table>
@@ -109,8 +127,28 @@ const censorName = async (id, name) => {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+.name-cell .censor {
+  cursor: pointer;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+.name-cell:hover .censor {
+  opacity: 1;
+}
 .timestamp-cell {
   font-size: 0.75em;
   white-space: nowrap;
+}
+.message-inner {
+  max-height: 6em;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+.amount-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.action-icon {
+  cursor: pointer;
 }
 </style>
