@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref, toRefs, watch} from 'vue'
+import {onMounted, ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 import { config } from '@/config'
@@ -38,18 +38,6 @@ const markDonation = async (id, readValue) => {
   }
 }
 
-const fakeDonation = {
-  id: 'fake-test',
-  external_id: 'fake-test',
-  timestamp: new Date().toISOString(),
-  name: 'TestiAnonyymi',
-  message: 'Fake testilahjoitus mark/unmark-napin testaamiseen',
-  read: false,
-  incentives: [],
-  amount: 42,
-}
-const displayDonations = computed(() => [...donations.value, fakeDonation])
-
 const censorName = async (id, name) => {
   let conf = confirm('Haluatko sensuroida käyttäjänimen ' + name + '?');
   if (conf){
@@ -76,7 +64,7 @@ const censorName = async (id, name) => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="donation in displayDonations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
+      <tr v-for="donation in donations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
         <td v-if="islogged" class="read-cell"><button @click="markDonation(donation.id, !donation.read)" type="submit" class="btn btn-primary read-btn"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
         <td class="timestamp-cell">
           <div>{{ new Date(donation.timestamp).toLocaleDateString("fi-FI") }}</div>
