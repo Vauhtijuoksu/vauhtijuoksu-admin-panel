@@ -20,7 +20,7 @@ const set_donations_flag = async () => {
 .btn-compact {
   padding: 6px 16px;
   font-size: 14px;
-  white-space: nowrap;
+  white-space: normal;
   font-weight: 600;
 }
 </style>

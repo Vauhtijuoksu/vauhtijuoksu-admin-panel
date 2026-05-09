@@ -54,7 +54,6 @@ const censorName = async (id, name) => {
   <table class="table">
     <thead>
       <tr>
-        <th scope="col">ID</th>
         <th v-if="islogged" scope="col">read</th>
         <th scope="col">timestamp</th>
         <th v-if="islogged"  scope="col"></th>
@@ -67,11 +66,10 @@ const censorName = async (id, name) => {
     </thead>
     <tbody>
       <tr v-for="donation in donations.slice().reverse()" :key="donation.id" :class="(donation.read || 'notread')">
-        <td><span :title='donation.id'>🆔</span><span :title=' donation.external_id '>🐼</span></td>
         <td v-if="islogged"><button @click="markDonation(donation.id, !donation.read)" type="submit" class="btn btn-primary"><template v-if="donation.read">Unmark</template><template v-else>Mark</template></button></td>
-        <td>{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
+        <td class="timestamp-cell">{{ new Date(donation.timestamp).toLocaleString("fi-FI") }}</td>
         <td v-if="islogged"><span @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span></td>
-        <td>{{ donation.name }}</td>
+        <td class="name-cell">{{ donation.name }}</td>
         <td>
           <span class="waiting-for-content" v-if="(!donation.message && config.emptyDonationLoadSeconds && new Date(donation.timestamp).getTime() > (Date.now() - 1000 * config.emptyDonationLoadSeconds))">
             * Odottaa viestiä *
@@ -105,4 +103,14 @@ const censorName = async (id, name) => {
 </template>
 
 <style scoped>
+.name-cell {
+  min-width: 18ch;
+  max-width: 24ch;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.timestamp-cell {
+  font-size: 0.75em;
+  white-space: nowrap;
+}
 </style>
