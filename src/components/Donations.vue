@@ -128,8 +128,6 @@ const censorName = async (id, name) => {
   white-space: nowrap;
 }
 .message-inner {
-  max-height: 6em;
-  overflow-y: auto;
   overflow-wrap: anywhere;
 }
 .amount-cell {
