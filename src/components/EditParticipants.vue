@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCrud } from '@/composables/useCrud'
 
@@ -108,19 +108,19 @@ onMounted(() => {
     <div v-if="mode === 'list'" class="list-view">
       <div class="header">
         <div>
-          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
+          <button @click="router.push('/edit')" class="btn btn-back">← Takaisin</button>
         </div>
-        <h2>Participants Management</h2>
+        <h2>Osallistujat</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            Add New Participant
+            Lisää osallistuja
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            Preview Changes ({{ changeCount }})
+            Esikatsele muutokset ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -135,37 +135,37 @@ onMounted(() => {
           <div class="participant-info">
             <div class="participant-header-compact">
               <span class="participant-name">{{ participant.display_name }}</span>
-              <span v-if="isEdited(participant)" class="badge badge-warning">Edited</span>
-              <span v-if="isMarkedForDeletion(participant)" class="badge badge-danger">Deleted</span>
+              <span v-if="isEdited(participant)" class="badge badge-warning">Muokattu</span>
+              <span v-if="isMarkedForDeletion(participant)" class="badge badge-danger">Poistettu</span>
             </div>
             <div class="participant-details-compact">
               <span v-if="getTwitchHandle(participant) !== '-'" class="participant-meta">🎮 {{ getTwitchHandle(participant) }}</span>
               <span v-if="getDiscordHandle(participant) !== '-'" class="participant-meta">💬 {{ getDiscordHandle(participant) }}</span>
-              <span v-if="getTwitchHandle(participant) === '-' && getDiscordHandle(participant) === '-'" class="text-muted-small">No socials</span>
+              <span v-if="getTwitchHandle(participant) === '-' && getDiscordHandle(participant) === '-'" class="text-muted-small">Ei someja</span>
             </div>
           </div>
           <div class="participant-actions">
             <button @click="openEdit(participant)" class="btn btn-sm btn-primary">
-              Edit
+              Muokkaa
             </button>
             <button 
               @click="remove(participant)" 
               :class="isMarkedForDeletion(participant) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(participant) ? 'Undo' : 'Delete' }}
+              {{ isMarkedForDeletion(participant) ? 'Peru' : 'Poista' }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="changes.post.length > 0" class="pending-section">
-        <h3>Pending New Participants</h3>
+        <h3>Lisättävät osallistujat</h3>
         <div class="participants-list-compact">
           <div v-for="participant in changes.post" :key="participant.display_name" class="participant-row-compact row-new">
             <div class="participant-info">
               <div class="participant-header-compact">
                 <span class="participant-name">{{ participant.display_name }}</span>
-                <span class="badge badge-success">New</span>
+                <span class="badge badge-success">Uusi</span>
               </div>
               <div class="participant-details-compact">
                 <span v-if="getTwitchHandle(participant) !== '-'" class="participant-meta">🎮 {{ getTwitchHandle(participant) }}</span>
@@ -174,7 +174,7 @@ onMounted(() => {
             </div>
             <div class="participant-actions">
               <button @click="removeAdded(participant)" class="btn btn-sm btn-danger">
-                Remove
+                Poista
               </button>
             </div>
           </div>
@@ -186,24 +186,24 @@ onMounted(() => {
     <div v-else-if="mode === 'form'" class="form-view">
       <div class="form-header header-with-back">
         <button @click="changeView('list')" class="btn btn-back">
-          ← Back
+          ← Takaisin
         </button>
-        <h2>{{ selectedParticipant.id ? 'Edit Participant' : 'Add New Participant' }}</h2>
+        <h2>{{ selectedParticipant.id ? 'Muokkaa osallistujaa' : 'Lisää osallistuja' }}</h2>
         <div></div>
       </div>
       
       <form class="edit-form">
         <div class="form-section">
-          <h3>Basic Information</h3>
+          <h3>Perustiedot</h3>
           <div class="form-row">
             <div class="form-group">
-              <label for="display_name" class="form-label">Display Name *</label>
+              <label for="display_name" class="form-label">Nimi *</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="display_name" 
                 v-model='selectedParticipant.display_name'
-                placeholder="Enter participant's display name"
+                placeholder="Osallistujan nimi"
                 required
               >
             </div>
@@ -211,27 +211,27 @@ onMounted(() => {
         </div>
 
         <div class="form-section">
-          <h3>Social Media</h3>
+          <h3>Some</h3>
           <div class="social-form">
             <div class="social-field">
-              <label for="twitch_username" class="form-label">Twitch Username</label>
+              <label for="twitch_username" class="form-label">Twitch-käyttäjä</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="twitch_username" 
                 v-model='twitchUsername'
-                placeholder="username"
+                placeholder="käyttäjänimi"
               >
             </div>
 
             <div class="social-field">
-              <label for="discord_username" class="form-label">Discord Username</label>
+              <label for="discord_username" class="form-label">Discord-käyttäjä</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="discord_username" 
                 v-model='discordUsername'
-                placeholder="username"
+                placeholder="käyttäjänimi"
               >
             </div>
           </div>
@@ -239,10 +239,10 @@ onMounted(() => {
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            Save Changes
+            Tallenna
           </button>
           <button type="button" @click="changeView('list')" class="btn btn-secondary">
-            Discard
+            Peruuta
           </button>
         </div>
       </form>
@@ -251,31 +251,31 @@ onMounted(() => {
     <!-- PREVIEW VIEW -->
     <div v-else-if="mode === 'preview'" class="preview-view">
       <div class="preview-header">
-        <h2>Preview Changes</h2>
-        <p class="text-muted">Review your changes before applying them to production</p>
+        <h2>Muutosten esikatselu</h2>
+        <p class="preview-subtitle">Tarkista muutokset ennen kuin viet ne tuotantoon</p>
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Päivitykset ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>New Items ({{ changes.post.length }})</h3>
+        <h3>Uudet ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>Deletions ({{ changes.delete.length }})</h3>
+        <h3>Poistot ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
       <div class="preview-actions">
         <button @click="changeView('list')" class="btn btn-secondary">
-          ← Back to List
+          ← Takaisin listaan
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          Apply Changes
+          Vie muutokset
         </button>
       </div>
     </div>

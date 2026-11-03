@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { ref } from 'vue';
 
-const API_URL = 'https://api.vauhtijuoksu.fi';
+// Set VITE_API_URL in .env.development.local to use another API in development, e.g. a local one
+const API_URL = import.meta.env.VITE_API_URL ?? 'https://api.vauhtijuoksu.fi';
 
 /**
  * Get authentication credentials from localStorage
@@ -15,8 +17,11 @@ const getAuth = () => ({
  */
 const handleError = (err) => {
   console.log(err);
-  alert("Something went wrong, refresh page and see damages");
+  alert("Tallennus epäonnistui, tätä muutosta ei tehty");
 };
+
+// True while reading from the API fails. Shown as a banner, since an alert on every poll would block the page
+export const apiError = ref(false);
 
 /**
  * Create an authenticated axios instance
@@ -26,7 +31,15 @@ export const api = {
    * GET request
    */
   get: (endpoint) => {
-    return axios.get(`${API_URL}${endpoint}`).catch(handleError);
+    return axios.get(`${API_URL}${endpoint}`)
+      .then(response => {
+        apiError.value = false;
+        return response;
+      })
+      .catch(err => {
+        console.log(err);
+        apiError.value = true;
+      });
   },
 
   /**

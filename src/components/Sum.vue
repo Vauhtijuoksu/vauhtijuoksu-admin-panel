@@ -1,5 +1,6 @@
 <script setup>
-import { ref, toRefs, watch } from 'vue'
+import { computed, toRefs } from 'vue'
+import { euros } from '@/utils/format'
 
 const props = defineProps({
   donations: Object
@@ -7,24 +8,18 @@ const props = defineProps({
 
 const { donations } = toRefs(props);
 
-let sum = ref(0);
-
-watch(donations, () => {
-  sum.value = 0;
-  for (let donation of donations.value){
-    sum.value += donation.amount
-  }
-})
+const sum = computed(() => donations.value.reduce((sum, donation) => sum + donation.amount, 0));
 </script>
 
 <template>
   <div class="sum-container">
-    <span class="sum-amount">{{ sum.toFixed(2) }} €</span>
+    <span class="sum-amount">{{ euros(sum) }}</span>
   </div>
 </template>
 
 <style scoped>
 .sum-container {
+  flex-shrink: 0;
   padding: 4px 16px;
 }
 

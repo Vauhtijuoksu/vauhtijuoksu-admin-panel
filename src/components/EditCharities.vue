@@ -53,19 +53,19 @@ onMounted(() => {
     <div v-if="mode === 'list'" class="list-view">
       <div class="header">
         <div>
-          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
+          <button @click="router.push('/edit')" class="btn btn-back">← Takaisin</button>
         </div>
-        <h2>Charities Management</h2>
+        <h2>Kohteet</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            Add New Charity
+            Lisää kohde
           </button>
           <button
             v-if="changeCount > 0"
             @click="changeView('preview')"
             class="btn btn-warning"
           >
-            Preview Changes ({{ changeCount }})
+            Esikatsele muutokset ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -80,43 +80,43 @@ onMounted(() => {
           <div class="item-header">
             <h3>{{ charity.name }}</h3>
             <div class="item-badges">
-              <span v-if="isEdited(charity)" class="badge badge-warning">Edited</span>
-              <span v-if="isMarkedForDeletion(charity)" class="badge badge-danger">Deleted</span>
+              <span v-if="isEdited(charity)" class="badge badge-warning">Muokattu</span>
+              <span v-if="isMarkedForDeletion(charity)" class="badge badge-danger">Poistettu</span>
             </div>
           </div>
           <div class="item-details">
             <div class="detail-row"><span class="label">Id:</span><span class="value">{{ charity.id }}</span></div>
             <div class="detail-row"><span class="label">Url:</span><span class="value">{{ charity.url || '-' }}</span></div>
-            <div class="detail-row"><span class="label">Goal:</span><span class="value">{{ charity.goal ?? '-' }}</span></div>
-            <div class="detail-row"><span class="label">Image:</span><span class="value">{{ charity.img_filename || '-' }}</span></div>
+            <div class="detail-row"><span class="label">Tavoite:</span><span class="value">{{ charity.goal ?? '-' }}</span></div>
+            <div class="detail-row"><span class="label">Kuva:</span><span class="value">{{ charity.img_filename || '-' }}</span></div>
           </div>
           <div class="item-actions">
             <button @click="openEdit(charity)" class="btn btn-sm btn-primary">
-              Edit
+              Muokkaa
             </button>
             <button
               @click="remove(charity)"
               :class="isMarkedForDeletion(charity) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(charity) ? 'Undo' : 'Delete' }}
+              {{ isMarkedForDeletion(charity) ? 'Peru' : 'Poista' }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="changes.post.length > 0" class="pending-section">
-        <h3>Pending New Charities</h3>
+        <h3>Lisättävät kohteet</h3>
         <div class="items-grid">
           <div v-for="charity in changes.post" :key="charity.name" class="item-card item-new">
             <div class="item-header">
               <h3>{{ charity.name }}</h3>
               <div class="item-badges">
-                <span class="badge badge-success">New</span>
+                <span class="badge badge-success">Uusi</span>
               </div>
             </div>
             <div class="item-actions">
               <button @click="removeAdded(charity, 'name')" class="btn btn-sm btn-danger">
-                Remove
+                Poista
               </button>
             </div>
           </div>
@@ -128,9 +128,9 @@ onMounted(() => {
     <div v-else-if="mode === 'form'" class="form-view">
       <div class="form-header header-with-back">
         <button @click="changeView('list')" class="btn btn-back">
-          ← Back
+          ← Takaisin
         </button>
-        <h2>{{ selectedCharity.id ? 'Edit Charity' : 'Add New Charity' }}</h2>
+        <h2>{{ selectedCharity.id ? 'Muokkaa kohdetta' : 'Lisää kohde' }}</h2>
         <div></div>
       </div>
 
@@ -138,7 +138,7 @@ onMounted(() => {
         <div class="form-section">
           <div class="form-row">
             <div class="form-group">
-              <label for="name" class="form-label">Name *</label>
+              <label for="name" class="form-label">Nimi *</label>
               <input type="text" class="form-control" id="name" v-model="selectedCharity.name" required>
             </div>
           </div>
@@ -150,11 +150,11 @@ onMounted(() => {
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="goal" class="form-label">Goal (€)</label>
+              <label for="goal" class="form-label">Tavoite (€)</label>
               <input type="number" min="0" step="1" class="form-control" id="goal" v-model.number="selectedCharity.goal">
             </div>
             <div class="form-group">
-              <label for="img_filename" class="form-label">Image file name</label>
+              <label for="img_filename" class="form-label">Kuvatiedosto</label>
               <input type="text" class="form-control" id="img_filename" v-model="selectedCharity.img_filename" placeholder="wwf.png">
             </div>
           </div>
@@ -162,10 +162,10 @@ onMounted(() => {
 
         <div class="form-actions">
           <button type="submit" class="btn btn-success">
-            Save Changes
+            Tallenna
           </button>
           <button type="button" @click="changeView('list')" class="btn btn-secondary">
-            Discard
+            Peruuta
           </button>
         </div>
       </form>
@@ -174,31 +174,31 @@ onMounted(() => {
     <!-- PREVIEW VIEW -->
     <div v-else-if="mode === 'preview'" class="preview-view">
       <div class="preview-header">
-        <h2>Preview Changes</h2>
-        <p class="text-muted">Review your changes before applying them to production. A charity with donations can't be deleted</p>
+        <h2>Muutosten esikatselu</h2>
+        <p class="preview-subtitle">Tarkista muutokset ennen kuin viet ne tuotantoon. Kohdetta, jolla on lahjoituksia, ei voi poistaa</p>
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Päivitykset ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>New Items ({{ changes.post.length }})</h3>
+        <h3>Uudet ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>Deletions ({{ changes.delete.length }})</h3>
+        <h3>Poistot ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
       <div class="preview-actions">
         <button @click="changeView('list')" class="btn btn-secondary">
-          ← Back to List
+          ← Takaisin listaan
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          Apply Changes
+          Vie muutokset
         </button>
       </div>
     </div>

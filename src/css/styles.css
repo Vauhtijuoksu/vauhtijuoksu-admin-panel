@@ -57,19 +57,6 @@ html, body, #app{
 
 }
 
-.no-login button{
-    background-color: #9e2c2c;
-    border-color: #580505;
-}
-
-.no-login .user{
-    display: none;
-}
-
-.death-off .minus{
-    display: none;
-}
-
 .content {
     height: 100vh;
     display: flex;
@@ -91,46 +78,13 @@ html, body, #app{
     --bs-table-color: #e0e0e0;
 }
 
-/* Section widths are now dynamically controlled in MainView */
-#incentiveoutput {
-    margin-left: 5px;
-    width: 95%;
-}
 .hidden {
     display: none;
-}
-.deaths{
-    width: 160px;
-}
-.deathcount{
-    width: 50px;
-    display: inline-block;
 }
 button{
     margin: 3px;
 }
 /* Admin section widths are now controlled in MainView scoped styles */
-.incentive_info{
-    position: relative;
-
-}
-.incentive_info > div{
-    display: none;
-    position: absolute;
-    background-color: #030817;
-    font-size: 18px;
-    padding: 10px;
-    margin-top: -5px;
-    white-space: nowrap;
-    z-index: 1000;
-    right: 90px;
-}
-
-
-.incentive_info:hover > div{
-    display: inline-block;
-}
-
 /* KAIKKI TÄN JÄLKEEN ON LEGACYPASKAA */
 .amount{
     width: 10%;
@@ -261,4 +215,9 @@ input[type=checkbox]
   height: 25px;
   background: #4CAF50;
   cursor: pointer;
+}
+
+/* On a narrow screen the top bar continues on a second line instead of overlapping */
+.statusbar {
+    flex-wrap: wrap;
 }

@@ -3,8 +3,10 @@
 import { ref } from 'vue'
 import api from '@/utils/api'
 import { useRoute, useRouter } from 'vue-router'
+import { useCharities } from '@/composables/useCharities'
 
 const donation = ref({})
+const { charities } = useCharities()
 
 const route = useRoute()
 const router = useRouter()
@@ -16,36 +18,57 @@ const getDonation = async (id) => {
   }
 }
 
-const patchDonation = async (id, donation) => {
-  return api.patch(`/donations/${id}`, { name: donation.name, message: donation.message });
-}
-
 const saveChanges = async () => {
-  const conf = confirm('Do you want to save these changes?');
-  if (conf){
-    await patchDonation(route.params.id, donation.value)
-    router.push('/')
+  if (confirm('Tallennetaanko muutokset?')) {
+    const { name, message, charity } = donation.value
+    if (await api.patch(`/donations/${route.params.id}`, { name, message, charity })) {
+      router.push('/')
+    }
   }
 }
-
 
 getDonation(route.params.id);
 </script>
 
 <template>
-    <form>
-      <div class="mb-3">
-          <label for="name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="name" name="name" v-model='donation.name'>
+  <div class="edit-container form-view">
+    <div class="form-header header-with-back">
+      <button type="button" @click="router.push('/')" class="btn btn-back">← Takaisin</button>
+      <h2>Muokkaa lahjoitusta</h2>
+      <div></div>
+    </div>
+
+    <form class="edit-form" @submit.prevent="saveChanges()">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name" class="form-label">Nimi</label>
+            <input type="text" class="form-control" id="name" v-model="donation.name">
+          </div>
+          <div class="form-group" v-if="charities.length">
+            <label for="charity" class="form-label">Kohde</label>
+            <select class="form-select" id="charity" v-model="donation.charity">
+              <option :value="null">Ei kohdetta</option>
+              <option v-for="charity in charities" :key="charity.id" :value="charity.id">{{ charity.name }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="message" class="form-label">Viesti</label>
+            <textarea class="form-control" id="message" v-model="donation.message" rows="3"></textarea>
+          </div>
+        </div>
       </div>
-      <div class="mb-3">
-          <label for="message" class="form-label">Message</label>
-          <textarea class="form-control" id="message" name="message" v-model='donation.message' rows="3"></textarea>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">Tallenna</button>
+        <button type="button" @click="router.push('/')" class="btn btn-secondary">Peruuta</button>
       </div>
-      <button @click.prevent="saveChanges()" class="btn btn-primary">Submit</button>
-      <button @click="router.push('/')" class="btn btn-primary">Discard</button>
     </form>
+  </div>
 </template>
 
-<style>
+<style scoped>
+@import '@/css/edit-styles.css';
 </style>

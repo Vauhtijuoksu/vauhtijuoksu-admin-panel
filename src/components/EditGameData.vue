@@ -108,19 +108,19 @@ onMounted(() => {
     <div v-if="mode === 'list'" class="list-view">
       <div class="header">
         <div>
-          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
+          <button @click="router.push('/edit')" class="btn btn-back">← Takaisin</button>
         </div>
-        <h2>Game Data Management</h2>
+        <h2>Pelit</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            Add New Game
+            Lisää peli
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            Preview Changes ({{ changeCount }})
+            Esikatsele muutokset ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -135,8 +135,8 @@ onMounted(() => {
           <div class="game-info">
             <div class="game-header-compact">
               <span class="game-title">{{ game.game }}</span>
-              <span v-if="isEdited(game)" class="badge badge-warning">Edited</span>
-              <span v-if="isMarkedForDeletion(game)" class="badge badge-danger">Deleted</span>
+              <span v-if="isEdited(game)" class="badge badge-warning">Muokattu</span>
+              <span v-if="isMarkedForDeletion(game)" class="badge badge-danger">Poistettu</span>
             </div>
             <div class="game-details-compact">
               <span class="game-meta">{{ game.start_time }} - {{ game.end_time }}</span>
@@ -155,26 +155,26 @@ onMounted(() => {
           </div>
           <div class="game-actions">
             <button @click="openEdit(game)" class="btn btn-sm btn-primary">
-              Edit
+              Muokkaa
             </button>
             <button 
               @click="remove(game)" 
               :class="isMarkedForDeletion(game) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(game) ? 'Undo' : 'Delete' }}
+              {{ isMarkedForDeletion(game) ? 'Peru' : 'Poista' }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="changes.post.length > 0" class="pending-section">
-        <h3>Pending New Games</h3>
+        <h3>Lisättävät pelit</h3>
         <div class="games-list-compact">
           <div v-for="game in changes.post" :key="game.game" class="game-row-compact row-new">
             <div class="game-info">
               <div class="game-header-compact">
                 <span class="game-title">{{ game.game }}</span>
-                <span class="badge badge-success">New</span>
+                <span class="badge badge-success">Uusi</span>
               </div>
               <div class="game-details-compact">
                 <span class="game-meta">{{ game.start_time }} - {{ game.end_time }}</span>
@@ -182,7 +182,7 @@ onMounted(() => {
             </div>
             <div class="game-actions">
               <button @click="removeAdded(game)" class="btn btn-sm btn-danger">
-                Remove
+                Poista
               </button>
             </div>
           </div>
@@ -194,24 +194,24 @@ onMounted(() => {
     <div v-else-if="mode === 'form'" class="form-view">
       <div class="form-header header-with-back">
         <button @click="changeView('list')" class="btn btn-back">
-          ← Back
+          ← Takaisin
         </button>
-        <h2>{{ selectedGame.id ? 'Edit Game' : 'Add New Game' }}</h2>
+        <h2>{{ selectedGame.id ? 'Muokkaa peliä' : 'Lisää peli' }}</h2>
         <div></div>
       </div>
       
       <form class="edit-form">
         <div class="form-section">
-          <h3>Basic Information</h3>
+          <h3>Perustiedot</h3>
           <div class="form-row">
             <div class="form-group">
-              <label for="game" class="form-label">Game Name *</label>
+              <label for="game" class="form-label">Pelin nimi *</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="game" 
                 v-model='selectedGame.game'
-                placeholder="Enter game name"
+                placeholder="Pelin nimi"
                 required
               >
             </div>
@@ -219,7 +219,7 @@ onMounted(() => {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="start_time" class="form-label">Start Time *</label>
+              <label for="start_time" class="form-label">Alkaa *</label>
               <input 
                 type="text" 
                 class="form-control" 
@@ -227,10 +227,10 @@ onMounted(() => {
                 v-model='selectedGame.start_time'
                 placeholder="d.M.yyyy HH:mm:ss"
               >
-              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+              <small class="form-text">Muoto: d.M.yyyy HH:mm:ss</small>
             </div>
             <div class="form-group">
-              <label for="end_time" class="form-label">End Time *</label>
+              <label for="end_time" class="form-label">Päättyy *</label>
               <input 
                 type="text" 
                 class="form-control" 
@@ -238,67 +238,67 @@ onMounted(() => {
                 v-model='selectedGame.end_time'
                 placeholder="d.M.yyyy HH:mm:ss"
               >
-              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+              <small class="form-text">Muoto: d.M.yyyy HH:mm:ss</small>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <h3>Game Details</h3>
+          <h3>Pelin tiedot</h3>
           <div class="form-row">
             <div class="form-group">
-              <label for="category" class="form-label">Category</label>
+              <label for="category" class="form-label">Kategoria</label>
               <input type="text" class="form-control" id="category" v-model='selectedGame.category'>
             </div>
             <div class="form-group">
-              <label for="device" class="form-label">Device</label>
+              <label for="device" class="form-label">Laite</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="device" 
                 v-model='selectedGame.device'
                 list="device-list"
-                placeholder="Select or type new device"
+                placeholder="Valitse tai kirjoita uusi laite"
               >
               <datalist id="device-list">
                 <option v-for="device in uniqueDevices" :key="device" :value="device"></option>
               </datalist>
-              <small class="form-text">Select from existing or type new</small>
+              <small class="form-text">Valitse tai kirjoita uusi</small>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="published" class="form-label">Published</label>
+              <label for="published" class="form-label">Julkaistu</label>
               <input type="text" class="form-control" id="published" v-model='selectedGame.published'>
             </div>
             <div class="form-group">
-              <label for="img_filename" class="form-label">Image Filename</label>
+              <label for="img_filename" class="form-label">Kuvatiedosto</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="img_filename" 
                 v-model='selectedGame.img_filename'
                 list="image-list"
-                placeholder="Select or type new filename"
+                placeholder="Valitse tai kirjoita uusi tiedosto"
               >
               <datalist id="image-list">
                 <option v-for="filename in uniqueImageFilenames" :key="filename" :value="filename"></option>
               </datalist>
-              <small class="form-text">Select from existing or type new</small>
+              <small class="form-text">Valitse tai kirjoita uusi</small>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="meta" class="form-label">Meta (Twitch Game ID)</label>
+              <label for="meta" class="form-label">Meta (Twitchin peli-id)</label>
               <input type="text" class="form-control" id="meta" v-model='selectedGame.meta'>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <h3>Participants</h3>
+          <h3>Osallistujat</h3>
           <div class="participants-list">
             <div 
               v-for="(participant, index) in selectedGame.participants" 
@@ -306,7 +306,7 @@ onMounted(() => {
               class="participant-row"
             >
               <div class="participant-select">
-                <label>Player</label>
+                <label>Osallistuja</label>
                 <select class="form-select" v-model="participant.participant_id">
                   <option v-for="p in participants" :key="p.id" :value="p.id">
                     {{ p.display_name }}
@@ -314,13 +314,13 @@ onMounted(() => {
                 </select>
               </div>
               <div class="participant-role">
-                <label>Role</label>
+                <label>Rooli</label>
                 <select 
                   class="form-select" 
                   v-model="participant.role"
                 >
-                  <option value="PLAYER">PLAYER</option>
-                  <option value="COUCH">COUCH</option>
+                  <option value="PLAYER">Pelaaja</option>
+                  <option value="COUCH">Sohva</option>
                 </select>
               </div>
               <button 
@@ -328,7 +328,7 @@ onMounted(() => {
                 @click="selectedGame.participants.splice(index, 1)" 
                 class="btn btn-sm btn-danger"
               >
-                Remove
+                Poista
               </button>
             </div>
           </div>
@@ -337,16 +337,16 @@ onMounted(() => {
             @click="selectedGame.participants.push({ participant_id: participants[0]?.id, role: 'PLAYER' })" 
             class="btn btn-sm btn-secondary"
           >
-            Add Participant
+            Lisää osallistuja
           </button>
         </div>
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            Save Changes
+            Tallenna
           </button>
           <button @click="changeView('list')" class="btn btn-secondary">
-            Discard
+            Peruuta
           </button>
         </div>
       </form>
@@ -355,31 +355,31 @@ onMounted(() => {
     <!-- PREVIEW VIEW -->
     <div v-else-if="mode === 'preview'" class="preview-view">
       <div class="preview-header">
-        <h2>Preview Changes</h2>
-        <p class="text-muted">Review your changes before applying them to production</p>
+        <h2>Muutosten esikatselu</h2>
+        <p class="preview-subtitle">Tarkista muutokset ennen kuin viet ne tuotantoon</p>
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Päivitykset ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>New Items ({{ changes.post.length }})</h3>
+        <h3>Uudet ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>Deletions ({{ changes.delete.length }})</h3>
+        <h3>Poistot ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
       <div class="preview-actions">
         <button @click="changeView('list')" class="btn btn-secondary">
-          ← Back to List
+          ← Takaisin listaan
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          Apply Changes
+          Vie muutokset
         </button>
       </div>
     </div>

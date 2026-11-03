@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/utils/api'
 import { formatTimestamp, parseAndValidate, nowFormatted } from '@/utils/datetime'
@@ -120,19 +120,19 @@ onMounted(() => {
     <div v-if="mode === 'list'" class="list-view">
       <div class="header">
         <div>
-          <button @click="router.push('/edit')" class="btn btn-back">← Back to Main</button>
+          <button @click="router.push('/edit')" class="btn btn-back">← Takaisin</button>
         </div>
-        <h2>Incentives Management</h2>
+        <h2>Insentiivit</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            Add New Incentive
+            Lisää insentiivi
           </button>
           <button 
             v-if="hasChanges" 
             @click="changeView('preview')" 
             class="btn btn-warning"
           >
-            Preview Changes ({{ changeCount }})
+            Esikatsele muutokset ({{ changeCount }})
           </button>
         </div>
       </div>
@@ -147,8 +147,8 @@ onMounted(() => {
           <div class="incentive-info">
             <div class="incentive-header-compact">
               <span class="incentive-title">{{ incentive.title }}</span>
-              <span v-if="isEdited(incentive)" class="badge badge-warning">Edited</span>
-              <span v-if="isMarkedForDeletion(incentive)" class="badge badge-danger">Deleted</span>
+              <span v-if="isEdited(incentive)" class="badge badge-warning">Muokattu</span>
+              <span v-if="isMarkedForDeletion(incentive)" class="badge badge-danger">Poistettu</span>
               <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
             </div>
             <div class="incentive-details-compact">
@@ -159,26 +159,26 @@ onMounted(() => {
           </div>
           <div class="incentive-actions">
             <button @click="openEdit(incentive)" class="btn btn-sm btn-primary">
-              Edit
+              Muokkaa
             </button>
             <button 
               @click="remove(incentive)" 
               :class="isMarkedForDeletion(incentive) ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-danger'"
             >
-              {{ isMarkedForDeletion(incentive) ? 'Undo' : 'Delete' }}
+              {{ isMarkedForDeletion(incentive) ? 'Peru' : 'Poista' }}
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="changes.post.length > 0" class="pending-section">
-        <h3>Pending New Incentives</h3>
+        <h3>Lisättävät insentiivit</h3>
         <div class="incentives-list-compact">
           <div v-for="incentive in changes.post" :key="incentive.title" class="incentive-row-compact row-new">
             <div class="incentive-info">
               <div class="incentive-header-compact">
                 <span class="incentive-title">{{ incentive.title }}</span>
-                <span class="badge badge-success">New</span>
+                <span class="badge badge-success">Uusi</span>
                 <span v-if="incentive.type" class="badge badge-info">{{ incentive.type }}</span>
               </div>
               <div class="incentive-details-compact">
@@ -187,7 +187,7 @@ onMounted(() => {
             </div>
             <div class="incentive-actions">
               <button @click="removeAdded(incentive)" class="btn btn-sm btn-danger">
-                Remove
+                Poista
               </button>
             </div>
           </div>
@@ -199,19 +199,19 @@ onMounted(() => {
     <div v-else-if="mode === 'form'" class="form-view">
       <div class="form-header header-with-back">
         <button @click="changeView('list')" class="btn btn-back">
-          ← Back
+          ← Takaisin
         </button>
-        <h2>{{ selectedIncentive.id ? 'Edit Incentive' : 'Add New Incentive' }}</h2>
+        <h2>{{ selectedIncentive.id ? 'Muokkaa insentiiviä' : 'Lisää insentiivi' }}</h2>
         <div></div>
       </div>
       
       <form class="edit-form">
         <div class="form-section">
-          <h3>Basic Information</h3>
+          <h3>Perustiedot</h3>
           
           <div class="form-row" v-if="'game_id' in selectedIncentive || !selectedIncentive.id">
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label for="game" class="form-label">Associated Game</label>
+              <label for="game" class="form-label">Peli</label>
               <div class="game-selector">
                 <select 
                   v-if="'game_id' in selectedIncentive" 
@@ -228,7 +228,7 @@ onMounted(() => {
                   @click="delete selectedIncentive.game_id" 
                   class="btn btn-sm btn-danger"
                 >
-                  Remove Game Link
+                  Poista pelilinkki
                 </button>
                 <button 
                   v-if="!('game_id' in selectedIncentive)"
@@ -236,7 +236,7 @@ onMounted(() => {
                   @click="selectedIncentive.game_id = games[0]?.id" 
                   class="btn btn-sm btn-success"
                 >
-                  Link to Game
+                  Linkitä peliin
                 </button>
               </div>
             </div>
@@ -244,13 +244,13 @@ onMounted(() => {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="title" class="form-label">Title *</label>
+              <label for="title" class="form-label">Otsikko *</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="title" 
                 v-model='selectedIncentive.title'
-                placeholder="Enter incentive title"
+                placeholder="Insentiivin otsikko"
                 required
               >
             </div>
@@ -258,20 +258,20 @@ onMounted(() => {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="info" class="form-label">Info/Description</label>
+              <label for="info" class="form-label">Kuvaus</label>
               <textarea 
                 class="form-control" 
                 id="info" 
                 v-model='selectedIncentive.info'
                 rows="3"
-                placeholder="Additional information about this incentive"
+                placeholder="Lisätietoa insentiivistä"
               ></textarea>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="end_time" class="form-label">End Time *</label>
+              <label for="end_time" class="form-label">Päättyy *</label>
               <input 
                 type="text" 
                 class="form-control" 
@@ -279,22 +279,22 @@ onMounted(() => {
                 v-model='selectedIncentive.end_time'
                 placeholder="d.M.yyyy HH:mm:ss"
               >
-              <small class="form-text">Format: d.M.yyyy HH:mm:ss</small>
+              <small class="form-text">Muoto: d.M.yyyy HH:mm:ss</small>
             </div>
           </div>
         </div>
 
         <!-- TYPE SPECIFIC FIELDS (only for new incentives) -->
         <div v-if="selectedIncentive.id === undefined" class="form-section">
-          <h3>Incentive Type Configuration</h3>
+          <h3>Tyypin asetukset</h3>
           
           <div class="form-row">
             <div class="form-group">
-              <label for="type" class="form-label">Type *</label>
+              <label for="type" class="form-label">Tyyppi *</label>
               <select id="type" class="form-select" v-model="selectedIncentive.type">
-                <option value="open">Open (Free text)</option>
-                <option value="milestone">Milestone (Goals)</option>
-                <option value="option">Option (Multiple choice)</option>
+                <option value="open">Avoin (vapaa teksti)</option>
+                <option value="milestone">Välitavoitteet</option>
+                <option value="option">Vaihtoehdot</option>
               </select>
             </div>
           </div>
@@ -303,22 +303,22 @@ onMounted(() => {
           <div v-if="selectedIncentive.type === 'open'" class="type-config">
             <div class="form-row">
               <div class="form-group">
-                <label for="open_char_limit" class="form-label">Character Limit</label>
+                <label for="open_char_limit" class="form-label">Merkkiraja</label>
                 <input 
                   type="number" 
                   class="form-control" 
                   id="open_char_limit" 
                   v-model='selectedIncentive.open_char_limit'
-                  placeholder="e.g., 100"
+                  placeholder="esim. 100"
                 >
-                <small class="form-text">Maximum number of characters allowed</small>
+                <small class="form-text">Suurin sallittu merkkimäärä</small>
               </div>
             </div>
           </div>
 
           <!-- MILESTONE TYPE -->
           <div v-if="selectedIncentive.type === 'milestone'" class="type-config">
-            <label class="form-label">Milestone Amounts (€)</label>
+            <label class="form-label">Välitavoitteet (€)</label>
             <div class="milestone-list">
               <div 
                 v-for="(milestone, index) in selectedIncentive.milestones" 
@@ -329,7 +329,7 @@ onMounted(() => {
                   type="number" 
                   class="form-control" 
                   v-model='selectedIncentive.milestones[index]'
-                  placeholder="Amount in €"
+                  placeholder="Summa €"
                   step="0.01"
                 >
                 <button 
@@ -337,7 +337,7 @@ onMounted(() => {
                   @click="selectedIncentive.milestones.splice(index, 1)" 
                   class="btn btn-sm btn-danger"
                 >
-                  Remove
+                  Poista
                 </button>
               </div>
             </div>
@@ -346,13 +346,13 @@ onMounted(() => {
               @click="addMilestone(selectedIncentive)" 
               class="btn btn-sm btn-secondary"
             >
-              Add Milestone
+              Lisää välitavoite
             </button>
           </div>
 
           <!-- OPTION TYPE -->
           <div v-if="selectedIncentive.type === 'option'" class="type-config">
-            <label class="form-label">Options</label>
+            <label class="form-label">Vaihtoehdot</label>
             <div class="option-list">
               <div 
                 v-for="(option, index) in selectedIncentive.option_parameters" 
@@ -363,14 +363,14 @@ onMounted(() => {
                   type="text" 
                   class="form-control" 
                   v-model='selectedIncentive.option_parameters[index]'
-                  placeholder="Option text"
+                  placeholder="Vaihtoehto"
                 >
                 <button 
                   type="button"
                   @click="selectedIncentive.option_parameters.splice(index, 1)" 
                   class="btn btn-sm btn-danger"
                 >
-                  Remove
+                  Poista
                 </button>
               </div>
             </div>
@@ -379,17 +379,17 @@ onMounted(() => {
               @click="addOptionParameter(selectedIncentive)" 
               class="btn btn-sm btn-secondary"
             >
-              Add Option
+              Lisää vaihtoehto
             </button>
           </div>
         </div>
 
         <div class="form-actions">
           <button @click.prevent="saveChanges()" class="btn btn-success">
-            Save Changes
+            Tallenna
           </button>
           <button type="button" @click="changeView('list')" class="btn btn-secondary">
-            Discard
+            Peruuta
           </button>
         </div>
       </form>
@@ -398,31 +398,31 @@ onMounted(() => {
     <!-- PREVIEW VIEW -->
     <div v-else-if="mode === 'preview'" class="preview-view">
       <div class="preview-header">
-        <h2>Preview Changes</h2>
-        <p class="text-muted">Review your changes before applying them to production</p>
+        <h2>Muutosten esikatselu</h2>
+        <p class="preview-subtitle">Tarkista muutokset ennen kuin viet ne tuotantoon</p>
       </div>
 
       <div class="preview-section" v-if="Object.keys(changes.patch).length > 0">
-        <h3>Updates ({{ Object.keys(changes.patch).length }})</h3>
+        <h3>Päivitykset ({{ Object.keys(changes.patch).length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.patch, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.post.length > 0">
-        <h3>New Items ({{ changes.post.length }})</h3>
+        <h3>Uudet ({{ changes.post.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.post, null, 2) }}</pre>
       </div>
 
       <div class="preview-section" v-if="changes.delete.length > 0">
-        <h3>Deletions ({{ changes.delete.length }})</h3>
+        <h3>Poistot ({{ changes.delete.length }})</h3>
         <pre class="preview-code">{{ JSON.stringify(changes.delete, null, 2) }}</pre>
       </div>
 
       <div class="preview-actions">
         <button @click="changeView('list')" class="btn btn-secondary">
-          ← Back to List
+          ← Takaisin listaan
         </button>
         <button @click="changesToProd()" class="btn btn-danger">
-          Apply Changes
+          Vie muutokset
         </button>
       </div>
     </div>

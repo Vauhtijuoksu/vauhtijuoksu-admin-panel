@@ -3,7 +3,6 @@ import {ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 
 const props = defineProps({
-  url: String,
   streamMetaData: Object
 })
 
@@ -42,7 +41,7 @@ const postStreamInfo = async () => {
 }
 
 .form-control {
-  width: 300px;
+  width: 210px;
   resize: vertical;
   padding: 6px 10px;
   font-size: 14px;

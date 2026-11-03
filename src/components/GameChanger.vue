@@ -15,14 +15,15 @@ if (clientId && token){
 
 const props = defineProps({
   games: Object,
-  url: String,
-  legacyurl: String,
   streamMetaData: Object
 })
 
 const { games, streamMetaData } = toRefs(props);
 
-let game = ref("Loading...");
+// Only logged in users can change the game
+const islogged = !!localStorage.getItem('username');
+
+let game = ref(null);
 let previousGameId = ref(null);
 
 watch(streamMetaData, () => {
@@ -69,9 +70,11 @@ const setCurrentGameTwitch = async (gameTwitchId) => {
 
 const setCurrentGame = async (direction) => {
 
-  const gameIndex = games.value.findIndex(x => x === game.value)
-  game.value = games.value[gameIndex + direction]
-  
+  const gameIndex = games.value.findIndex(x => x.id === game.value?.id)
+  const newGame = games.value[gameIndex + direction]
+  if (!newGame) return
+  game.value = newGame
+
   const response = await api.patch('/stream-metadata', {current_game_id: game.value.id});
   
   if (response && games.value.length && clientId && token) {
@@ -81,16 +84,34 @@ const setCurrentGame = async (direction) => {
 </script>
 
 <template>
-  <div class="flex-column">
-    <div style="width: 15vw; height: 2.2em; line-height: 1.1" class="flex-column flex-center">
-      {{ game?.game }}
-    </div>
-    <div class="flex-row space-around">
-      <button @click="setCurrentGame(-1)" type="submit" class="btn btn-primary">Edellinen</button>
-      <button @click="setCurrentGame(1)" type="submit" class="btn btn-primary">Seuraava</button>
-    </div>
+  <div class="game-container">
+    <button v-if="islogged" @click="setCurrentGame(-1)" type="button" class="btn btn-sm btn-primary">◀ Edellinen</button>
+    <span class="game-name" :title="game?.game">{{ game?.game ?? (games.length ? '-' : 'Ladataan...') }}</span>
+    <button v-if="islogged" @click="setCurrentGame(1)" type="button" class="btn btn-sm btn-primary">Seuraava ▶</button>
   </div>
 </template>
 
 <style scoped>
+.game-container {
+  /* Takes the free space in the top bar. The top bar wraps before this gets narrower than the buttons and a short name */
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  padding: 4px 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.game-container button {
+  flex-shrink: 0;
+}
+
+.game-name {
+  min-width: 6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>

@@ -117,13 +117,13 @@ export function useCrud(endpoint, transformResponse = null) {
    * @param {Function} beforeSubmit - Optional function to transform data before submission
    */
   const applyChanges = async (beforeSubmit = null) => {
-    const conf = confirm('Do you want these changes to prod?');
+    const conf = confirm('Viedäänkö muutokset tuotantoon?');
     if (!conf) return;
 
     try {
-      // Clone changes to avoid mutation during processing
-      const patchData = { ...changes.value.patch };
-      const postData = [...changes.value.post];
+      // Deep copies, so beforeSubmit can transform them without touching changes that may have to be kept
+      const patchData = JSON.parse(JSON.stringify(changes.value.patch));
+      const postData = JSON.parse(JSON.stringify(changes.value.post));
       const deleteData = [...changes.value.delete];
 
       // Apply beforeSubmit transformation if provided
@@ -131,29 +131,38 @@ export function useCrud(endpoint, transformResponse = null) {
         await beforeSubmit(patchData, postData);
       }
 
+      // A failed request has already alerted and returns nothing. Changes that failed are kept, so they can be fixed
+      // and applied again, while the ones that went through aren't sent twice
+      const failed = { patch: {}, post: [], delete: [] };
+
       // Apply patches
       for (const key in patchData) {
-        await patchItem(key, patchData[key]);
+        if (!await patchItem(key, patchData[key])) {
+          failed.patch[key] = changes.value.patch[key];
+        }
       }
 
       // Apply posts and deletes in parallel
-      const posts = postData.map(item => postItem(item));
-      const deletes = deleteData.map(id => deleteItem(id));
+      const posts = postData.map(async (item, i) => {
+        if (!await postItem(item)) {
+          failed.post.push(changes.value.post[i]);
+        }
+      });
+      const deletes = deleteData.map(async id => {
+        if (!await deleteItem(id)) {
+          failed.delete.push(id);
+        }
+      });
       await Promise.all([...posts, ...deletes]);
 
-      // Reset changes
-      changes.value = {
-        patch: {},
-        post: [],
-        delete: [],
-      };
+      changes.value = failed;
 
       // Refresh items
       await getItems();
       changeView('list');
     } catch (error) {
       console.error('Error applying changes:', error);
-      alert("Timestamps were invalid, refresh page and try again, no changes were made to prod");
+      alert("Virheellinen aikaleima (muoto d.M.yyyy HH:mm:ss). Mitään ei viety tuotantoon");
     }
   };
 

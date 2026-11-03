@@ -1,27 +1,30 @@
 <script setup>
 
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watchEffect} from 'vue'
 import api from '@/utils/api'
 
 import Donations from './Donations.vue'
 import Authentication from './Authentication.vue'
 import Sum from './Sum.vue'
-import Game from './Game.vue'
+import CharityTotals from './CharityTotals.vue'
 import GameChanger from "./GameChanger.vue";
 import StreamInfo from "./StreamInfo.vue";
 import updateGoal from "./updateGoal.vue";
 import ResetDeath from "./ResetDeath.vue"
-import Heartrate from "./Heartrate.vue";
 import Incentives from "./Incentives.vue";
 import DonationsFlag from "./DonationsFlag.vue";
 import Timetable from "./Timetable.vue";
 
-const url = 'https://api.vauhtijuoksu.fi';
 
 const donations = ref([]);
+const unread = computed(() => donations.value.filter(d => !d.read).length);
+// Visible also when the panel is in a background tab
+watchEffect(() => {
+  document.title = unread.value ? `(${unread.value}) VJ-admin-panel` : 'VJ-admin-panel';
+});
 const games = ref([]);
 const streamMetaData = ref({});
-const incentives = ref({});
+const incentives = ref([]);
 const participants = ref([]);
 
 // Section widths (percentages) for horizontal layout
@@ -156,7 +159,7 @@ const getGames = async () => {
   if (response?.data) {
     games.value = response.data;
   }
-  setTimeout(getIncentives, 20000);
+  setTimeout(getGames, 20000);
 }
 
 const getParticipants = async () => {
@@ -185,45 +188,30 @@ getParticipants();
     <div class="statusbar flex-row">
       <Sum :donations="donations"/>
       <div class="statusbar-separator"></div>
-      <Game :games="games" :streamMetaData="streamMetaData"/>
+      <GameChanger :games="games" :streamMetaData="streamMetaData"/>
       <div class="statusbar-separator"></div>
-      <div class="heartrate-group">
-        <Heartrate :sensor="1"/>
-        <Heartrate :sensor="2"/>
-        <Heartrate :sensor="3"/>
-        <Heartrate :sensor="4"/>
-        <Heartrate :sensor="5"/>
-      </div>
-      <div class="spacer"></div>
+      <router-link v-if="username" to="/edit" class="btn btn-secondary">Muokkaa</router-link>
       <Authentication/>
     </div>
     <div id="admin" class="admin hidden">
       <div class="admin-section">
-        <div class="admin-section-title">Pelin hallinta</div>
-        <GameChanger :games="games" :url="url" :streamMetaData="streamMetaData"/>
-      </div>
-      
-      <div class="admin-separator"></div>
-      
-      <div class="admin-section">
         <div class="admin-section-title">Stream-tiedot</div>
-        <StreamInfo :url="url" :streamMetaData="streamMetaData"/>
+        <StreamInfo :streamMetaData="streamMetaData"/>
       </div>
       
       <div class="admin-separator"></div>
       
       <div class="admin-section">
         <div class="admin-section-title">Tavoite</div>
-        <updateGoal :url="url" :streamMetaData="streamMetaData"/>
+        <updateGoal :streamMetaData="streamMetaData"/>
       </div>
       
       <div class="admin-separator"></div>
       
       <div class="admin-section">
-        <div class="admin-section-title">Toiminnot</div>
         <div class="admin-actions">
-          <DonationsFlag :url="url"/>
-          <ResetDeath :url="url"/>
+          <DonationsFlag/>
+          <ResetDeath/>
         </div>
       </div>
     </div>
@@ -232,9 +220,13 @@ getParticipants();
         {{ isVerticalLayout ? '↔️' : '↕️' }}
       </button>
       <div class="section donations" :style="isVerticalLayout ? { height: donationsHeight + '%' } : { width: donationsWidth + '%' }">
-        <div class="section-header">Lahjoitukset</div>
+        <div class="section-header donations-header">
+          Lahjoitukset
+          <span v-if="unread" class="unread-count">{{ unread }} lukematta</span>
+          <CharityTotals :donations="donations"/>
+        </div>
         <div class="scrollable">
-          <Donations :url="url" :games="games" :donations="donations" :incentives="incentives"/>
+          <Donations :games="games" :donations="donations" :incentives="incentives"/>
         </div>
       </div>
       <div class="resizer" :class="isVerticalLayout ? 'resizer-vertical' : 'resizer-horizontal'" @mousedown="startResize($event, 'donations')"></div>
@@ -263,22 +255,30 @@ getParticipants();
   align-self: center;
 }
 
-.heartrate-group {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  align-items: center;
+.unread-count {
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #5e2121;
+  border: 1px solid #b71c1c;
+  font-size: 12px;
 }
 
-.spacer {
-  flex: 1;
+.donations-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusbar > .btn {
+  flex-shrink: 0;
 }
 
 .admin {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-  padding: 10px 20px;
+  gap: 8px;
+  padding: 6px 12px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -358,7 +358,8 @@ getParticipants();
 .section .scrollable {
   flex: 1;
   overflow-y: auto;
-  overflow-x: visible;
+  overflow-x: auto;
+  overflow-wrap: break-word;
   padding: 10px;
 }
 

@@ -1,5 +1,5 @@
 <script setup>
-import {ref, toRefs, watch} from 'vue'
+import {computed, toRefs} from 'vue'
 
 const props = defineProps({
   gamedata: Object,
@@ -28,6 +28,13 @@ const isCurrentGame = (game) => {
   return streamMetaData.value?.current_game_id === game.id;
 };
 
+// The game after the current one, or without a current game the first one that hasn't started
+const nextGame = computed(() => {
+  const games = [...gamedata.value].sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+  const current = games.findIndex(isCurrentGame);
+  return current >= 0 ? games[current + 1] : games.find(game => new Date(game.start_time) > new Date());
+});
+
 const isPastGame = (game) => {
   // Don't hide the current game even if it's past its scheduled time
   if (isCurrentGame(game)) {
@@ -43,12 +50,9 @@ const isPastGame = (game) => {
 <template>
   <div v-for="game in gamedata" :key="game.id">
     <div v-if="!isPastGame(game)">
-      <div v-if="isCurrentGame(game)">
-        <h4 class="text-current">{{ game.game }}</h4>
-      </div>
-      <div v-else>
-        <h4>{{ game.game }}</h4>
-      </div>
+      <span v-if="isCurrentGame(game)" class="game-badge badge-now">Nyt</span>
+      <span v-else-if="game.id === nextGame?.id" class="game-badge badge-next">Seuraavaksi</span>
+      <h4 :class="{ 'text-current': isCurrentGame(game) }">{{ game.game }}</h4>
       
       <p v-if="game.category">{{ game.category }}</p>
       
@@ -69,6 +73,23 @@ const isPastGame = (game) => {
 </template>
 
 <style scoped>
+.game-badge {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-now {
+  background: #2e7d32;
+  color: #fff;
+}
+.badge-next {
+  border: 1px solid #aaa;
+  color: #ddd;
+}
   .text-current {
     color: #28a745;
     font-weight: bold;

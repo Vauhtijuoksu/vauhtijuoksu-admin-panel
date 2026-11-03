@@ -5,23 +5,23 @@ const router = useRouter()
 
 const menuItems = [
   {
-    title: 'Game Data',
-    description: 'Manage games, schedules, and participants',
+    title: 'Pelit',
+    description: 'Pelit, aikataulu ja osallistujat',
     route: '/edit/gamedata'
   },
   {
-    title: 'Incentives',
-    description: 'Manage donation incentives and goals',
+    title: 'Insentiivit',
+    description: 'Lahjoitusinsentiivit ja tavoitteet',
     route: '/edit/incentives'
   },
   {
-    title: 'Participants',
-    description: 'Manage runners and commentators',
+    title: 'Osallistujat',
+    description: 'Pelaajat ja kommentaattorit',
     route: '/edit/participants'
   },
   {
-    title: 'Charities',
-    description: 'Manage charities that donations go to',
+    title: 'Kohteet',
+    description: 'Kohteet, joille lahjoitukset menevät',
     route: '/edit/charities'
   }
 ]
@@ -31,9 +31,9 @@ const menuItems = [
   <div class="edit-main-container">
     <div class="header">
       <div>
-        <button @click="router.push('/')" class="btn btn-back">← Back to Dashboard</button>
+        <button @click="router.push('/')" class="btn btn-back">← Etusivulle</button>
       </div>
-      <h1>Admin Panel</h1>
+      <h1>Hallinta</h1>
       <div></div>
     </div>
 

@@ -1,39 +1,30 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { ref } from 'vue'
 
-const username = ref(localStorage.getItem('username'));
-const password = ref(localStorage.getItem('password'));
-const twitchAccesssToken = ref(localStorage.getItem('twitch_access_token'))
+// The user the page was loaded with. Logging in or out reloads the page
+const loggedInAs = localStorage.getItem('username');
+const username = ref(loggedInAs ?? '');
+const password = ref('');
+const twitchConnected = !!localStorage.getItem('twitch_access_token');
 
 const twitchClientId = 'fpp1oz1ndhiob1wzfr4f7dh6r7s9oe'
-const twitchRedirectUri = 'https://admin-panel.vauhtijuoksu.fi'
+const twitchRedirectUri = window.location.origin
 const twitchScope = encodeURIComponent('channel:manage:broadcast channel:read:editors')
 const twitchUrl = `https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${twitchClientId}&redirect_uri=${twitchRedirectUri}&scope=${twitchScope}`
 
-const onSubmit = () => {
+const login = () => {
   if (username.value && password.value) {
     localStorage.setItem('username', username.value);
     localStorage.setItem('password', password.value);
-    document.getElementById("login").classList.remove("no-login")
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("login").style.display = "block";
     location.reload();
   }
-
-};
-const onLoginClick = () => {
-  document.getElementById("auth").style.display = "block";
-  document.getElementById("login").style.display = "none";
-
 };
 
-onMounted(()=> {
-  document.getElementById("auth").style.display = "none";
-  if (username.value) {
-    document.getElementById("login").classList.remove("no-login")
-  }
-})
+const logout = () => {
+  localStorage.removeItem('username');
+  localStorage.removeItem('password');
+  location.reload();
+};
 
 if (document.location.hash.split('&')[0].split('=')[0] === '#access_token'){
   const twitch_access_token = document.location.hash.split('&')[0].split('=')[1]
@@ -42,38 +33,59 @@ if (document.location.hash.split('&')[0].split('=')[0] === '#access_token'){
   window.history.replaceState({}, document.title, "/")
   location.reload();
 }
-
 </script>
 
 <template>
-  <div id="twitch">
-    <div v-if="!twitchAccesssToken">
-      <a :href=twitchUrl>Connect with Twitch</a>
-    </div>
-  </div>
-  <div id="login" class="no-login">
-    <form @submit.prevent="onLoginClick">
-      <div class="flex-row">
-
-        <div class="user">Käyttäjä: {{ username }}</div>
-      <button type="submit" class="btn btn-primary">Kirjaudu sisään</button>
-      </div>
+  <button type="button" popovertarget="login-popup" class="btn user-button"
+          :class="loggedInAs ? 'btn-secondary' : 'btn-danger'" :title="loggedInAs">
+    {{ loggedInAs ? '👤 ' + loggedInAs : 'Kirjaudu sisään' }}
+  </button>
+  <!-- A native popover: closes on Esc and on a click outside it -->
+  <div id="login-popup" popover class="login-popup">
+    <form @submit.prevent="login">
+      <label class="form-label" for="login-username">Käyttäjä</label>
+      <input id="login-username" v-model="username" class="form-control" autocomplete="username">
+      <label class="form-label" for="login-password">Salasana</label>
+      <input id="login-password" v-model="password" type="password" class="form-control" autocomplete="current-password">
+      <button type="submit" class="btn btn-primary">{{ loggedInAs ? 'Vaihda käyttäjä' : 'Kirjaudu' }}</button>
     </form>
-  </div>
-  <div id="auth" class="auth">
-    <form @submit.prevent="onSubmit">
-      <div class="flex-row">
-        <label class="form-label">Username</label>
-        <input v-model="username" type="text" class="form-control">
-        <label class="form-label">Password</label>
-        <input v-model="password" type="password" class="form-control">
-
-        <button type="submit" class="btn btn-primary">Kirjaudu</button>
-      </div>
-    </form>
+    <button v-if="loggedInAs" type="button" class="btn btn-secondary" @click="logout">Kirjaudu ulos</button>
+    <a v-if="!twitchConnected" :href="twitchUrl">Yhdistä Twitchiin</a>
   </div>
 </template>
 
-
 <style scoped>
+.user-button {
+  flex-shrink: 0;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-popup {
+  /* Below the top bar's right end, instead of the middle of the screen */
+  position: fixed;
+  inset: 64px 16px auto auto;
+  margin: 0;
+  width: 260px;
+  padding: 16px;
+  border: 1px solid #2a3a5a;
+  border-radius: 8px;
+  background: #081536;
+  color: #e0e0e0;
+  font-size: 16px;
+}
+
+.login-popup form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-popup .btn, .login-popup a {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+}
 </style>

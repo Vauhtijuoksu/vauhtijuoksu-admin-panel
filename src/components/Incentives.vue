@@ -1,7 +1,7 @@
 <script setup>
-import {ref, toRefs, watch} from 'vue'
-import axios from 'axios'
+import {ref, toRefs} from 'vue'
 import { config } from '@/config'
+import { euros } from '@/utils/format'
 import api from '@/utils/api'
 
 const props = defineProps({
@@ -16,6 +16,13 @@ const getParticipantName = (participantId) => {
   const participant = participants.value.find(p => p.id === participantId);
   return participant?.display_name || 'Unknown';
 };
+
+const gameOf = (incentive) => gamedata.value.find(x => x.id === incentive.game_id);
+
+const participantsIn = (incentive, role) => (gameOf(incentive)?.participants ?? [])
+  .filter(p => p.role === role)
+  .map(p => getParticipantName(p.participant_id))
+  .join(', ');
 
 const isTopOption = (status, allStatuses) => {
   const max = Math.max(...allStatuses.map(s => s.amount));
@@ -60,7 +67,7 @@ const extendEndTime = async (incentive) => {
 </script>
 
 <template>
-  <tr v-for="incentive in incentives" :key="incentive.id">
+  <div v-for="incentive in incentives" :key="incentive.id">
     <div v-if="new Date(incentive.end_time) >= new Date(new Date().getTime() - 60 * 60000)">
       <div v-if="new Date(incentive.end_time) >= new Date() && (!config.incentiveLockedBeforeHours || new Date(incentive.end_time).getTime() < Date.now() + config.incentiveLockedBeforeHours * 1000 * 60 * 60)">
         <h4>{{ incentive.title }}</h4>
@@ -70,16 +77,14 @@ const extendEndTime = async (incentive) => {
       </div>
       <p>{{ incentive.info }}</p>
 
-      <div v-if="gamedata.length && incentive.game_id">
-        <p><span class="label">🎮 Peli:</span> {{gamedata.find(x => x.id === incentive.game_id).game}}</p>
-        <div v-if="gamedata.find(x => x.id === incentive.game_id).participants && gamedata.find(x => x.id === incentive.game_id).participants.length > 0">
-          <p v-if="gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'PLAYER').length > 0">
-            <span class="label">🕹️ Pelaajat:</span> {{ gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'PLAYER').map(p => getParticipantName(p.participant_id)).join(', ') }}
-          </p>
-          <p v-if="gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'COUCH').length > 0">
-            <span class="label">🛋️ Sohvalla:</span> {{ gamedata.find(x => x.id === incentive.game_id).participants.filter(p => p.role === 'COUCH').map(p => getParticipantName(p.participant_id)).join(', ') }}
-          </p>
-        </div>
+      <div v-if="gameOf(incentive)">
+        <p><span class="label">🎮 Peli:</span> {{ gameOf(incentive).game }}</p>
+        <p v-if="participantsIn(incentive, 'PLAYER')">
+          <span class="label">🕹️ Pelaajat:</span> {{ participantsIn(incentive, 'PLAYER') }}
+        </p>
+        <p v-if="participantsIn(incentive, 'COUCH')">
+          <span class="label">🛋️ Sohvalla:</span> {{ participantsIn(incentive, 'COUCH') }}
+        </p>
       </div>
       <p>
         <span class="label">⏰ Sulkeutuu:</span> {{new Date(incentive.end_time).toLocaleString("fi-FI")}}
@@ -91,9 +96,9 @@ const extendEndTime = async (incentive) => {
           <h5 class="subheader">🎯 Tilanne / Tavoite</h5>
           <div class="milestone-progress">
             <div class="milestone-numbers">
-              <span class="milestone-current">{{incentive.total_amount.toFixed(2)}}€</span>
+              <span class="milestone-current">{{ euros(incentive.total_amount) }}</span>
               <span class="milestone-sep">/</span>
-              <span class="milestone-goal">{{incentive.milestones[0]}}€</span>
+              <span class="milestone-goal">{{ euros(incentive.milestones[0]) }}</span>
               <span class="milestone-percent">({{ Math.min(100, (incentive.total_amount / incentive.milestones[0]) * 100).toFixed(0) }}%)</span>
             </div>
             <div class="milestone-bar">
@@ -101,10 +106,10 @@ const extendEndTime = async (incentive) => {
             </div>
             <div class="milestone-remaining">
               <span v-if="incentive.total_amount >= incentive.milestones[0]" class="milestone-reached">
-                ✅ Tavoite saavutettu! (+{{ (incentive.total_amount - incentive.milestones[0]).toFixed(2) }}€ yli)
+                ✅ Tavoite saavutettu! (+{{ euros(incentive.total_amount - incentive.milestones[0]) }} yli)
               </span>
               <span v-else class="milestone-left">
-                ⏳ <strong>{{ (incentive.milestones[0] - incentive.total_amount).toFixed(2) }}€</strong> jäljellä tavoitteeseen
+                ⏳ <strong>{{ euros(incentive.milestones[0] - incentive.total_amount) }}</strong> jäljellä tavoitteeseen
               </span>
             </div>
           </div>
@@ -116,13 +121,13 @@ const extendEndTime = async (incentive) => {
           {{ sortMap[incentive.id] ? '↕️ Alkuperäinen' : '💰 Järjestä summan mukaan' }}
         </button>
       </div>
-      <tr v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
+      <div v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
         <span class="crown-prefix" :class="{ 'is-leader': isTopOption(status, incentive.status) }">👑 </span>{{status.option}}
-        {{status.amount.toFixed(2)}}e
+        {{ euros(status.amount) }}
         <span v-if="!isTopOption(status, incentive.status) && gapToLeader(status, incentive.status) > 0" class="gap-to-leader">
-          (−{{ gapToLeader(status, incentive.status).toFixed(2) }}€)
+          (−{{ euros(gapToLeader(status, incentive.status)) }})
         </span>
-      </tr>
+      </div>
       </div>
       <div v-if="incentive.type === 'open'">
       <div class="subheader-row">
@@ -131,17 +136,17 @@ const extendEndTime = async (incentive) => {
           {{ sortMap[incentive.id] ? '↕️ Alkuperäinen' : '💰 Järjestä summan mukaan' }}
         </button>
       </div>
-      <tr v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
+      <div v-for="status in sortedStatus(incentive)" :key="status.option" :class="{ 'top-option': isTopOption(status, incentive.status) }">
         <span class="crown-prefix" :class="{ 'is-leader': isTopOption(status, incentive.status) }">👑 </span>{{status.option}}
-        {{status.amount.toFixed(2)}}e
+        {{ euros(status.amount) }}
         <span v-if="!isTopOption(status, incentive.status) && gapToLeader(status, incentive.status) > 0" class="gap-to-leader">
-          (−{{ gapToLeader(status, incentive.status).toFixed(2) }}€)
+          (−{{ euros(gapToLeader(status, incentive.status)) }})
         </span>
-      </tr>
+      </div>
       </div>
       <hr/>
     </div>
-  </tr>
+  </div>
 </template>
 
 <style scoped>

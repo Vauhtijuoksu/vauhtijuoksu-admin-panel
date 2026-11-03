@@ -3,7 +3,6 @@ import {ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 
 const props = defineProps({
-  url: String,
   streamMetaData: Object
 })
 
