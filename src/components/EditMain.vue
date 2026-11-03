@@ -18,6 +18,11 @@ const menuItems = [
     title: 'Participants',
     description: 'Manage runners and commentators',
     route: '/edit/participants'
+  },
+  {
+    title: 'Charities',
+    description: 'Manage charities that donations go to',
+    route: '/edit/charities'
   }
 ]
 </script>
