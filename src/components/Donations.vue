@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, toRefs, watch} from 'vue'
+import {computed, onMounted, ref, toRefs, watch} from 'vue'
 import api from '@/utils/api'
 import { useRouter } from 'vue-router'
 import { config } from '@/config'
@@ -26,6 +26,25 @@ onMounted(()=> {
     islogged.value = true
   }
 })
+
+// Each charity gets a color and a short label, e.g. "WWF - itämeri" -> "WWF"
+const charityColors = ['#1565c0', '#2e7d32', '#6a1b9a', '#ef6c00', '#00838f', '#6d4c41']
+const charities = ref([])
+onMounted(async () => {
+  const response = await api.get('/charities')
+  if (response?.data) {
+    charities.value = response.data
+  }
+})
+const incentiveById = computed(() => Object.fromEntries(incentives.value.map(i => [i.id, i])))
+// Not every incentive is tied to a game
+const gameName = (incentive) => games.value.find(x => x.id === incentive?.game_id)?.game
+
+const charityById = computed(() => Object.fromEntries(charities.value.map((c, i) => [c.id, {
+  name: c.name,
+  label: c.name.split(' - ')[0],
+  color: charityColors[i % charityColors.length],
+}])))
 
 
 
@@ -73,6 +92,9 @@ const censorName = async (id, name) => {
         <td class="name-cell">
           {{ donation.name }}
           <span v-if="islogged" class="censor" @click="censorName(donation.id, donation.name)" title="sensuroi">🔞</span>
+          <div v-if="charityById[donation.charity]" class="charity-tag"
+               :style="{ background: charityById[donation.charity].color }"
+               :title="charityById[donation.charity].name">{{ charityById[donation.charity].label }}</div>
         </td>
         <td class="message-cell">
           <div class="message-inner">
@@ -89,14 +111,12 @@ const censorName = async (id, name) => {
             <div v-if="donation.incentives.length">
               <div v-for="incentive in donation.incentives" :key="incentive.code">
                 <div v-for="chosen_incentive in incentive.chosen_incentives" :key="chosen_incentive.incentive_id">
-                  <div v-if="incentives.length && games.length">
-                    <h5>{{games.find(x => x.id === incentives.find(x => x.id === chosen_incentive.incentive_id).game_id).game}}</h5>
-                    <h5>{{incentives.find(x => x.id === chosen_incentive.incentive_id).title}}:</h5>
-                    <p>{{chosen_incentive.parameter}}
-                    {{(donation.amount / donation.incentives.length /
-                    incentive.chosen_incentives.length).toFixed(2)
-                    }}e</p>
-                  </div>
+                  <h5>{{ gameName(incentiveById[chosen_incentive.incentive_id]) }}</h5>
+                  <h5>{{ incentiveById[chosen_incentive.incentive_id]?.title }}:</h5>
+                  <p>{{chosen_incentive.parameter}}
+                  {{(donation.amount / donation.incentives.length /
+                  incentive.chosen_incentives.length).toFixed(2)
+                  }}e</p>
                 </div>
               </div>
             </div>
@@ -136,5 +156,14 @@ const censorName = async (id, name) => {
 }
 .action-icon {
   cursor: pointer;
+}
+.charity-tag {
+  width: fit-content;
+  margin-top: 2px;
+  padding: 0 6px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 600;
 }
 </style>
