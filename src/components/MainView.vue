@@ -231,7 +231,7 @@ getParticipants();
       </div>
       <div class="resizer" :class="isVerticalLayout ? 'resizer-vertical' : 'resizer-horizontal'" @mousedown="startResize($event, 'donations')"></div>
       <div class="section incentives" :style="isVerticalLayout ? { height: incentivesHeight + '%' } : { width: incentivesWidth + '%' }">
-        <div class="section-header">Insentiivit</div>
+        <div class="section-header">Kannustimet</div>
         <div class="scrollable">
           <Incentives :incentives="incentives" :gamedata="games" :participants="participants"/>
         </div>

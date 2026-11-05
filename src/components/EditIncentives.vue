@@ -122,10 +122,10 @@ onMounted(() => {
         <div>
           <button @click="router.push('/edit')" class="btn btn-back">← Takaisin</button>
         </div>
-        <h2>Insentiivit</h2>
+        <h2>Kannustimet</h2>
         <div class="header-actions">
           <button @click="openAdd()" class="btn btn-success">
-            Lisää insentiivi
+            Lisää kannustin
           </button>
           <button 
             v-if="hasChanges" 
@@ -172,7 +172,7 @@ onMounted(() => {
       </div>
 
       <div v-if="changes.post.length > 0" class="pending-section">
-        <h3>Lisättävät insentiivit</h3>
+        <h3>Lisättävät kannustimet</h3>
         <div class="incentives-list-compact">
           <div v-for="incentive in changes.post" :key="incentive.title" class="incentive-row-compact row-new">
             <div class="incentive-info">
@@ -201,7 +201,7 @@ onMounted(() => {
         <button @click="changeView('list')" class="btn btn-back">
           ← Takaisin
         </button>
-        <h2>{{ selectedIncentive.id ? 'Muokkaa insentiiviä' : 'Lisää insentiivi' }}</h2>
+        <h2>{{ selectedIncentive.id ? 'Muokkaa kannustinta' : 'Lisää kannustin' }}</h2>
         <div></div>
       </div>
       
@@ -250,7 +250,7 @@ onMounted(() => {
                 class="form-control" 
                 id="title" 
                 v-model='selectedIncentive.title'
-                placeholder="Insentiivin otsikko"
+                placeholder="Kannustimen otsikko"
                 required
               >
             </div>
@@ -264,7 +264,7 @@ onMounted(() => {
                 id="info" 
                 v-model='selectedIncentive.info'
                 rows="3"
-                placeholder="Lisätietoa insentiivistä"
+                placeholder="Lisätietoa kannustimesta"
               ></textarea>
             </div>
           </div>

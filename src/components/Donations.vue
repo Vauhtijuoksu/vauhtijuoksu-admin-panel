@@ -267,15 +267,14 @@ const censorName = async (donation) => {
   color: #e0c890;
   opacity: 0.8;
 }
-.new-donation > td {
+/* Animating the row, not its cells: Chrome doesn't repaint the unread row color after a cell animation ends.
+   Without a "to" frame it fades to the row's own color */
+.new-donation {
   animation: new-donation 6s ease-out;
 }
 @keyframes new-donation {
   from {
     background-color: rgba(255, 209, 102, 0.45);
-  }
-  to {
-    background-color: transparent;
   }
 }
 .read-btn {

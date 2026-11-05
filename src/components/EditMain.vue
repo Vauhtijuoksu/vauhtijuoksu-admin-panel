@@ -10,8 +10,8 @@ const menuItems = [
     route: '/edit/gamedata'
   },
   {
-    title: 'Insentiivit',
-    description: 'Lahjoitusinsentiivit ja tavoitteet',
+    title: 'Kannustimet',
+    description: 'Lahjoituskannustimet ja tavoitteet',
     route: '/edit/incentives'
   },
   {
