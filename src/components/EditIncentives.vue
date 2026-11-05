@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import api from '@/utils/api'
 import { formatTimestamp, parseAndValidate, nowFormatted } from '@/utils/datetime'
 import { useCrud } from '@/composables/useCrud'
+import { euros } from '@/utils/format'
 
 const router = useRouter()
 
@@ -106,6 +107,16 @@ const changeCount = computed(() => {
          changes.value.post.length + 
          changes.value.delete.length;
 });
+
+// Saved options that already have donations but are renamed or removed in this edit. Donations are counted by
+// the option's name, so theirs would drop out of the totals
+const droppedOptions = computed(() => {
+  const saved = incentives.value.find(i => i.id === selectedIncentive.value.id)
+  if (saved?.type !== 'option') {
+    return []
+  }
+  return saved.status.filter(s => s.amount > 0 && !selectedIncentive.value.option_parameters?.includes(s.option))
+})
 
 const getGameName = (gameId) => {
   return games.value.find(g => g.id === gameId)?.game || 'Unknown Game';
@@ -358,6 +369,10 @@ onMounted(() => {
             <label class="form-label">Vaihtoehdot</label>
             <!-- Donations are counted by the option's name -->
             <small v-if="selectedIncentive.id" class="form-text d-block mb-2">⚠️ Nimen muutos pudottaa vanhat lahjoitukset laskuista, ne on tallennettu nimellä</small>
+            <div v-if="droppedOptions.length" class="alert alert-warning py-2">
+              ⚠️ Nämä lahjoitukset putoavat laskuista:
+              <div v-for="dropped in droppedOptions" :key="dropped.option"><b>{{ dropped.option }}</b> {{ euros(dropped.amount) }}</div>
+            </div>
             <div class="option-list">
               <div 
                 v-for="(option, index) in selectedIncentive.option_parameters" 
