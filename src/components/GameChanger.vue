@@ -26,7 +26,7 @@ const islogged = !!localStorage.getItem('username');
 let game = ref(null);
 let previousGameId = ref(null);
 
-watch(streamMetaData, () => {
+watch([games, streamMetaData], () => {
   if (games.value.length){
     const newGame = games.value.find(x => x.id === streamMetaData.value.current_game_id);
     
