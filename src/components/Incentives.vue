@@ -1,6 +1,5 @@
 <script setup>
 import {ref, toRefs} from 'vue'
-import { config } from '@/config'
 import { euros } from '@/utils/format'
 import api from '@/utils/api'
 
@@ -69,7 +68,7 @@ const extendEndTime = async (incentive) => {
 <template>
   <div v-for="incentive in incentives" :key="incentive.id">
     <div v-if="new Date(incentive.end_time) >= new Date(new Date().getTime() - 60 * 60000)">
-      <div v-if="new Date(incentive.end_time) >= new Date() && (!config.incentiveLockedBeforeHours || new Date(incentive.end_time).getTime() < Date.now() + config.incentiveLockedBeforeHours * 1000 * 60 * 60)">
+      <div v-if="new Date(incentive.end_time) >= new Date()">
         <h4>{{ incentive.title }}</h4>
       </div>
       <div v-else>
