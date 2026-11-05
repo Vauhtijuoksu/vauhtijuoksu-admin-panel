@@ -71,6 +71,9 @@ const saveChanges = () => {
       title: selectedIncentive.value.title,
       info: selectedIncentive.value.info,
       end_time: selectedIncentive.value.end_time,
+      milestones: selectedIncentive.value.milestones,
+      option_parameters: selectedIncentive.value.option_parameters,
+      open_char_limit: selectedIncentive.value.open_char_limit,
     }
     selectedIncentive.value = {}
   } else {
@@ -284,14 +287,14 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- TYPE SPECIFIC FIELDS (only for new incentives) -->
-        <div v-if="selectedIncentive.id === undefined" class="form-section">
+        <!-- TYPE SPECIFIC FIELDS. The type of a saved incentive can't be changed, its donations are counted by it -->
+        <div class="form-section">
           <h3>Tyypin asetukset</h3>
           
           <div class="form-row">
             <div class="form-group">
               <label for="type" class="form-label">Tyyppi *</label>
-              <select id="type" class="form-select" v-model="selectedIncentive.type">
+              <select id="type" class="form-select" v-model="selectedIncentive.type" :disabled="selectedIncentive.id !== undefined">
                 <option value="open">Avoin (vapaa teksti)</option>
                 <option value="milestone">Välitavoitteet</option>
                 <option value="option">Vaihtoehdot</option>
@@ -353,6 +356,8 @@ onMounted(() => {
           <!-- OPTION TYPE -->
           <div v-if="selectedIncentive.type === 'option'" class="type-config">
             <label class="form-label">Vaihtoehdot</label>
+            <!-- Donations are counted by the option's name -->
+            <small v-if="selectedIncentive.id" class="form-text d-block mb-2">⚠️ Nimen muutos pudottaa vanhat lahjoitukset laskuista, ne on tallennettu nimellä</small>
             <div class="option-list">
               <div 
                 v-for="(option, index) in selectedIncentive.option_parameters" 

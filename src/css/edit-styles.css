@@ -277,6 +277,11 @@
   background: #1a1a1a;
 }
 
+.form-control:disabled, .form-select:disabled {
+  background-color: #2a2a2a;
+  color: #aaa;
+}
+
 .form-control:focus, .form-select:focus {
   outline: none;
   border-color: #007bff;
